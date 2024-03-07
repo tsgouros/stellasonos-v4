@@ -61,6 +61,8 @@ buck-out/
 
 # Ruby / CocoaPods
 /ios/Pods/
+/ios/Podfile
+/ios/Podfile.lock
 /vendor/bundle/
 
 # more i added
