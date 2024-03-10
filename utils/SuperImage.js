@@ -242,13 +242,16 @@ class SuperImage {
     });
   }
 
+  // Depending on where the user interacts with the image (determined
+  // by the gesture's x, y coordinates) to trigger different sounds or
+  // haptic feedback based on segment
   play(x, y) {
     // need to incorporate logic to check the segmentation data
-    // depending on where the user interacts with the image (determined by the gesture's x, y coordinates) to trigger different sounds or haptic feedback based on segment
+
     const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 'impactHeavy';
     if (this.canTriggerVibration) {
-      console.log(`Triggering Haptic with style: ${style}`); // Display haptic trigger style
-                this.triggerHaptic(style);
+      console.log(`Triggering Haptic with style: ${style}`);
+      this.triggerHaptic(style);
       this.canTriggerVibration = false;
       setTimeout(() => {
         this.canTriggerVibration = true;
@@ -261,10 +264,24 @@ class SuperImage {
     }
   }
 
+  triggerSound() {
+    this.soundPlayer.play(() => {
+      console.log("Sound started.");
+    });
+  }
+
   stopSound() {
     if (this.soundPlayer.isPlaying) {
       this.soundPlayer.stop();
     }
+  }
+
+  triggerHaptic(style) {
+    ReactNativeHapticFeedback.trigger(style, {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+    console.log(`Haptic feedback triggered: ${style}`);
   }
 
   componentWillUnmount() {

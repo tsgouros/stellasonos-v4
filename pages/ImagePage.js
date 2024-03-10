@@ -22,11 +22,12 @@ export default function ImagePage({ route, navigation }) {
 
   // Create an instance of SuperImage
   const superImageRef = useRef(new SuperImage(image));
-  const superImage = superImageRef.current;
+  //const superImage = superImageRef.current;
+  //console.log("created superimage");
 
-  const pan = useRef(new Animated.ValueXY()).current;
-  const [currentX, setCurrentX] = useState(0);
-  const [currentY, setCurrentY] = useState(0);
+  const pan = useRef(new Animated.ValueXY());
+  const currentX = useRef(0);
+  const currentY = useRef(0);
 
   const xPadding = 45;
 
@@ -40,22 +41,14 @@ export default function ImagePage({ route, navigation }) {
       onStartShouldSetPanResponderCapture: () => true,
       onPanResponderGrant: (e, r) => {
         // prevent the dot from moving out of bounds with simple ternary operators
-        pan.setOffset({
-          x:
-            pan.x._value > xMax
-              ? xMax
-              : pan.x._value < -xMax
-              ? -xMax
-              : pan.x._value,
-          y:
-            pan.y._value > yMax
-              ? yMax
-              : pan.y._value < -yMax
-              ? -yMax
-              : pan.y._value,
+        pan.current.setOffset({
+          x: pan.current.x._value > xMax ? xMax : 
+            pan.current.x._value < -xMax ? -xMax : pan.current.x._value,
+          y: pan.current.y._value > yMax ? yMax : 
+            pan.current.y._value < -yMax ? -yMax : pan.current.y._value,
         });
       },
-      // onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
+      // onPanResponderMove: Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], {
       //   useNativeDriver: false,
       //   onPanResponderRelease: (event, gestureState) => {
       //     //After the change in the location
@@ -64,41 +57,31 @@ export default function ImagePage({ route, navigation }) {
       // }),
       // modified the panResponder to call superImage.play during movements
       onPanResponderMove: (e, gestureState) => {
-        superImage.play(gestureState.dx, gestureState.dy);
-        Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false })(e, gestureState);
+        console.log("playing........");
+        superImageRef.current.play(gestureState.dx, gestureState.dy);
+        Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], { useNativeDriver: false })(e, gestureState);
       },
       onPanResponderRelease: (e, r) => {
-        pan.flattenOffset();
-        setCurrentY(pan.y._value);
-        setCurrentX(pan.x._value);
+        pan.current.flattenOffset();
+        currentY.current = pan.current.y._value;
+        currentX.current = pan.current.x._value;
       },
     })
   ).current;
 
   // update current x and y values in the state for later
-  pan.x.addListener(({ value }) => {
-    setCurrentX(value);
-  });
-  pan.y.addListener(({ value }) => {
-    setCurrentY(value);
-  });
+  pan.current.x.addListener(({ value }) => { currentX.current = value; });
+  pan.current.y.addListener(({ value }) => { currentY.current = value; });
   const handleX = (delta) => {
     var newX =
-      currentX + delta > xMax
-        ? xMax
-        : currentX + delta < -xMax
-        ? -xMax
-        : currentX + delta;
-    pan.setValue({ x: newX, y: currentY });
+      currentX.current + delta > xMax ? xMax : 
+        currentX.current + delta < -xMax ? -xMax : currentX.current + delta;
+    pan.current.setValue({ x: newX, y: currentY.current });
   };
   const handleY = (delta) => {
-    var newY =
-      currentY + delta > yMax
-        ? yMax
-        : currentY + delta < -yMax
-        ? -yMax
-        : currentY + delta;
-    pan.setValue({ x: currentX, y: newY });
+    var newY = currentY.current + delta > yMax ? yMax : 
+        currentY.current + delta < -yMax ? -yMax : currentY.current + delta;
+    pan.current.setValue({ x: currentX.current, y: newY });
   };
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -134,14 +117,14 @@ export default function ImagePage({ route, navigation }) {
           style={{
             transform: [
               {
-                translateX: pan.x.interpolate({
+                translateX: pan.current.x.interpolate({
                   inputRange: [-xMax, xMax],
                   outputRange: [-xMax, xMax],
                   extrapolate: "clamp",
                 }),
               },
               {
-                translateY: pan.y.interpolate({
+                translateY: pan.current.y.interpolate({
                   inputRange: [-yMax, yMax],
                   outputRange: [-yMax, yMax],
                   extrapolate: "clamp",
@@ -157,17 +140,17 @@ export default function ImagePage({ route, navigation }) {
           style={styles.imageContainer}
           onStartShouldSetResponder={() => true}
           onResponderMove={(event) => {            
-            pan.setValue({
+            pan.current.setValue({
               x: event.nativeEvent.locationX - xMax - 20,
               y: event.nativeEvent.locationY - yMax - 20,
             });
-            console.log(event.nativeEvent.pageX, event.nativeEvent.pageY, event.nativeEvent.locationX, event.nativeEvent.locationY, yMax, xMax,  );
+            console.log("event:",event.nativeEvent.pageX, event.nativeEvent.pageY, event.nativeEvent.locationX, event.nativeEvent.locationY, yMax, xMax,  );
           }}
         >
           <ImageBackground
             style={styles.tinyLogo}
             // source={{ uri: image.src }}
-            source={{ uri: superImage.image.src }}
+            source={{ uri: superImageRef.current.image.src }}
           ></ImageBackground>
         </View>
       </View>
