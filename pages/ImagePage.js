@@ -20,10 +20,12 @@ import SuperImage from '../utils/SuperImage.js';
 export default function ImagePage({ route, navigation }) {
   const { image, name } = route.params;
 
+  console.log("initializing with:", name);
+
   // Create an instance of SuperImage
   const superImageRef = useRef(new SuperImage(image));
   //const superImage = superImageRef.current;
-  //console.log("created superimage");
+  console.log("created superimage");
 
   const pan = useRef(new Animated.ValueXY());
   const currentX = useRef(0);
@@ -58,8 +60,9 @@ export default function ImagePage({ route, navigation }) {
       // modified the panResponder to call superImage.play during movements
       onPanResponderMove: (e, gestureState) => {
         console.log("playing........");
-        superImageRef.current.play(gestureState.dx, gestureState.dy);
-        Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], { useNativeDriver: false })(e, gestureState);
+        superImageRef.current.currentImage().play(gestureState.dx, gestureState.dy);
+        Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], 
+                       { useNativeDriver: false })(e, gestureState);
       },
       onPanResponderRelease: (e, r) => {
         pan.current.flattenOffset();
@@ -150,7 +153,7 @@ export default function ImagePage({ route, navigation }) {
           <ImageBackground
             style={styles.tinyLogo}
             // source={{ uri: image.src }}
-            source={{ uri: superImageRef.current.image.src }}
+            source={{ uri: superImageRef.current.currentImage().image.src }}
           ></ImageBackground>
         </View>
       </View>

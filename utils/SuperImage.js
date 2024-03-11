@@ -2,9 +2,34 @@ import { Animated, PanResponder } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Player } from '@react-native-community/audio-toolkit';
 
-class SuperImage {
+// Class to hold a single image, meant to be part of a stack of
+// images, in the 'SuperImage' class.
+class SubImage {
+
   constructor(image) {
+    console.log("initializing SubImage");
     this.image = image; // full image object passed from ImagePage
+  }
+
+  clone = async function() {
+    return(new SubImage(this.image));
+  }
+}
+
+
+// This class is meant to hold a whole collection of SubImages, so we
+// can choose which one to display.
+class SuperImage {
+  constructor(image, name="") {
+    var subImage = new SubImage(image);
+    var imageKey=name;
+    if (imageKey == "") imageKey = "1"; 
+    this.images = new Array();  // a collection of SubImage objects.
+    this.images[imageKey] = subImage;   // Load the first one.
+    console.log("initializing superImage", Object.keys(this.images));
+    this.currentImageKey = Object.keys(this.images)[0];
+    console.log("first image is called:", this.currentImageKey);
+
     this.pan = new Animated.ValueXY(); // handling drag movements
     this.canTriggerVibration = true; // control vibration feedback frequency
     this.soundUrl = "https://your-sound-url-here.mp3"; //url for sound effect
@@ -27,6 +52,16 @@ class SuperImage {
     this.performSegmentation();
   }
 
+  addImage(image, name="") {
+    var imageKey = name;
+    if (imageKey == "") imageKey=this.images.length.toString();
+    
+    this.images[imageKey] = image;
+  }
+
+  currentImage() {
+    return(this.images[this.currentImageKey]);
+  }
   
   performSegmentation() {
     console.log("Performing segmentation on the image");
