@@ -27,7 +27,7 @@ export default function ImagePage({ route, navigation }) {
   //const superImage = superImageRef.current;
   console.log("created superimage");
 
-  const pan = useRef(new Animated.ValueXY());
+  const pan = useRef(new Animated.ValueXY()).current;
   const currentX = useRef(0);
   const currentY = useRef(0);
 
@@ -41,50 +41,47 @@ export default function ImagePage({ route, navigation }) {
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onStartShouldSetPanResponderCapture: () => true,
+
+      // prevent the dot (point of interest) from moving out of
+      // bounds with simple ternary operators
       onPanResponderGrant: (e, r) => {
-        // prevent the dot from moving out of bounds with simple ternary operators
-        pan.current.setOffset({
-          x: pan.current.x._value > xMax ? xMax : 
-            pan.current.x._value < -xMax ? -xMax : pan.current.x._value,
-          y: pan.current.y._value > yMax ? yMax : 
-            pan.current.y._value < -yMax ? -yMax : pan.current.y._value,
+        pan.setOffset({
+          x: pan.x._value > xMax ? xMax : 
+            pan.x._value < -xMax ? -xMax : pan.x._value,
+          y: pan.y._value > yMax ? yMax : 
+            pan.y._value < -yMax ? -yMax : pan.y._value,
         });
       },
-      // onPanResponderMove: Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], {
-      //   useNativeDriver: false,
-      //   onPanResponderRelease: (event, gestureState) => {
-      //     //After the change in the location
-      //     console.log(event);
-      //   },
-      // }),
-      // modified the panResponder to call superImage.play during movements
+
+      // panResponder calls superImage.play during movements
       onPanResponderMove: (e, gestureState) => {
         console.log("playing........");
         superImageRef.current.play(gestureState.dx, gestureState.dy);
-        Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], 
+        Animated.event([null, { dx: pan.x, dy: pan.y }], 
                        { useNativeDriver: false })(e, gestureState);
       },
+
       onPanResponderRelease: (e, r) => {
-        pan.current.flattenOffset();
-        currentY.current = pan.current.y._value;
-        currentX.current = pan.current.x._value;
+        pan.flattenOffset();
+        currentY.current = pan.y._value;
+        currentX.current = pan.x._value;
       },
     })
   ).current;
 
   // update current x and y values in the state for later
-  pan.current.x.addListener(({ value }) => { currentX.current = value; });
-  pan.current.y.addListener(({ value }) => { currentY.current = value; });
+  pan.x.addListener(({ value }) => { currentX.current = value; });
+  pan.y.addListener(({ value }) => { currentY.current = value; });
   const handleX = (delta) => {
     var newX =
       currentX.current + delta > xMax ? xMax : 
         currentX.current + delta < -xMax ? -xMax : currentX.current + delta;
-    pan.current.setValue({ x: newX, y: currentY.current });
+    pan.setValue({ x: newX, y: currentY.current });
   };
   const handleY = (delta) => {
     var newY = currentY.current + delta > yMax ? yMax : 
         currentY.current + delta < -yMax ? -yMax : currentY.current + delta;
-    pan.current.setValue({ x: currentX.current, y: newY });
+    pan.setValue({ x: currentX.current, y: newY });
   };
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -120,14 +117,14 @@ export default function ImagePage({ route, navigation }) {
           style={{
             transform: [
               {
-                translateX: pan.current.x.interpolate({
+                translateX: pan.x.interpolate({
                   inputRange: [-xMax, xMax],
                   outputRange: [-xMax, xMax],
                   extrapolate: "clamp",
                 }),
               },
               {
-                translateY: pan.current.y.interpolate({
+                translateY: pan.y.interpolate({
                   inputRange: [-yMax, yMax],
                   outputRange: [-yMax, yMax],
                   extrapolate: "clamp",
@@ -143,7 +140,7 @@ export default function ImagePage({ route, navigation }) {
           style={styles.imageContainer}
           onStartShouldSetResponder={() => true}
           onResponderMove={(event) => {            
-            pan.current.setValue({
+            pan.setValue({
               x: event.nativeEvent.locationX - xMax - 20,
               y: event.nativeEvent.locationY - yMax - 20,
             });
