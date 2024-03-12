@@ -17,10 +17,16 @@ class SubImage {
 }
 
 
-// This class is meant to hold a whole collection of SubImages, so we
+// This class is meant to hold a whole collection of SubImages, each
+// corresponding to some component of an astronomical object. So we
 // can choose which one to display.
 class SuperImage {
   constructor(image, name="") {
+
+    // Ultimately, the constructor ought to begin with a collection of
+    // images and a description of how to portray them. For now, it
+    // has a single image input, from which we make a single-image
+    // collection. So this part is temporary.
     var subImage = new SubImage(image);
     var imageKey=name;
     if (imageKey == "") imageKey = "1"; 
@@ -29,6 +35,20 @@ class SuperImage {
     console.log("initializing superImage", Object.keys(this.images));
     this.currentImageKey = Object.keys(this.images)[0];
     console.log("first image is called:", this.currentImageKey);
+    // Previous lines are temporary.
+
+    // A single segment record corresponds to a region of the
+    // segmented image. It records a measure of the segment's size and
+    // color, and also an index into the tables for the sound and
+    // vibrations to be played for that segment. This is a prototype
+    // record to be used as a model. It is also the empty record
+    // returned when there is no object at that pixel position. 
+    this.segmentRecord = {sum: 0, color: 0, haptic: 0, sound: 0};
+
+    // This is a collection of records corresponding to the objects in
+    // an image. The zero record is the empty record.
+    this.segmentRecords = new Map();
+    this.segmentRecords.set(0, Object.assign({}, this.segmentRecord));
 
     this.pan = new Animated.ValueXY(); // handling drag movements
     this.canTriggerVibration = true; // control vibration feedback frequency
@@ -43,8 +63,8 @@ class SuperImage {
     });
 
     // placeholder for segmented image data
-    this.segmentedImage = null;
-
+    /// this.images['segmented'] = null;
+    
     // initialize PanResponder for drag interactions
     this.initPanResponder();
 
@@ -66,6 +86,13 @@ class SuperImage {
   performSegmentation() {
     console.log("Performing segmentation on the image");
     // segmentation logic here
+  }
+
+  // Retrieve one or more of the segment records corresponding to this
+  // screen position. These records will be used to decide what sounds
+  // and vibrations to play.
+  getRecords(x, y) {
+    console.log("getting segmentation records");
   }
 
   initPanResponder() {

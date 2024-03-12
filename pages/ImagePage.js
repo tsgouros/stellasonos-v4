@@ -60,7 +60,7 @@ export default function ImagePage({ route, navigation }) {
       // modified the panResponder to call superImage.play during movements
       onPanResponderMove: (e, gestureState) => {
         console.log("playing........");
-        superImageRef.current.currentImage().play(gestureState.dx, gestureState.dy);
+        superImageRef.current.play(gestureState.dx, gestureState.dy);
         Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], 
                        { useNativeDriver: false })(e, gestureState);
       },
