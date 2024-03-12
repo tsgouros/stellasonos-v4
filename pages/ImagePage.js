@@ -3,6 +3,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import {
   Animated,
+  Dimensions,
   View,
   StyleSheet,
   PanResponder,
@@ -13,7 +14,7 @@ import {
   Pressable,
 } from "react-native";
 
-import { Dimensions } from "react-native";
+import { Grayscale } from "react-native-image-filter-kit";
 
 import SuperImage from '../utils/SuperImage.js';
 
@@ -23,8 +24,7 @@ export default function ImagePage({ route, navigation }) {
   console.log("initializing with:", name);
 
   // Create an instance of SuperImage
-  const superImageRef = useRef(new SuperImage(image));
-  //const superImage = superImageRef.current;
+  const superImage = useRef(new SuperImage(image)).current;
   console.log("created superimage");
 
   const pan = useRef(new Animated.ValueXY()).current;
@@ -56,7 +56,7 @@ export default function ImagePage({ route, navigation }) {
       // panResponder calls superImage.play during movements
       onPanResponderMove: (e, gestureState) => {
         console.log("playing........");
-        superImageRef.current.play(gestureState.dx, gestureState.dy);
+        superImage.play(gestureState.dx, gestureState.dy);
         Animated.event([null, { dx: pan.x, dy: pan.y }], 
                        { useNativeDriver: false })(e, gestureState);
       },
@@ -150,7 +150,7 @@ export default function ImagePage({ route, navigation }) {
           <ImageBackground
             style={styles.tinyLogo}
             // source={{ uri: image.src }}
-            source={{ uri: superImageRef.current.currentImage().image.src }}
+            source={{ uri: superImage.currentImage().image.src }}
           ></ImageBackground>
         </View>
       </View>
