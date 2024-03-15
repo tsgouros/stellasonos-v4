@@ -148,49 +148,11 @@ export default function ImagePage({ route, navigation }) {
             console.log("event:",event.nativeEvent.pageX, event.nativeEvent.pageY, event.nativeEvent.locationX, event.nativeEvent.locationY, yMax, xMax,  );
           }}
         >
-       <Grayscale
-         image={
-              <Image
-                style={{ width: 2*xMax, height: 2*yMax }}
-                source={{uri: superImage.currentImage().image.src }}
-                resizeMode={'contain'}
-              />
-            } 
-        />
+       <Image 
+          style={styles.tinyLogo}
+          source={{ uri: superImage.currentImage().image.src }} 
+       />
         </View>
-      </View>
-
-      <View style={styles.toolBar}>
-        <AntDesign
-          onPress={() => handleX(-10)}
-          name="leftcircleo"
-          size={30}
-          color="black"
-        />
-        <AntDesign
-          onPress={() => handleX(10)}
-          name="rightcircleo"
-          size={30}
-          color="black"
-        />
-        <AntDesign
-          onPress={() => handleY(-10)}
-          name="upcircleo"
-          size={30}
-          color="black"
-        />
-        <AntDesign
-          onPress={() => handleY(10)}
-          name="downcircleo"
-          size={30}
-          color="black"
-        />
-        <AntDesign
-          onPress={() => setModalVisible(true)}
-          name="infocirlceo"
-          size={30}
-          color="black"
-        />
       </View>
     </View>
   );
@@ -234,13 +196,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  toolBar: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    width: 350,
-    paddingBottom: 30,
   },
 
   modalView: {
