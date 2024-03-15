@@ -10,6 +10,7 @@ import {
   Modal,
   Alert,
   Text,
+  Image,
   ImageBackground,
   Pressable,
 } from "react-native";
@@ -147,11 +148,15 @@ export default function ImagePage({ route, navigation }) {
             console.log("event:",event.nativeEvent.pageX, event.nativeEvent.pageY, event.nativeEvent.locationX, event.nativeEvent.locationY, yMax, xMax,  );
           }}
         >
-          <ImageBackground
-            style={styles.tinyLogo}
-            // source={{ uri: image.src }}
-            source={{ uri: superImage.currentImage().image.src }}
-          ></ImageBackground>
+       <Grayscale
+         image={
+              <Image
+                style={{ width: 2*xMax, height: 2*yMax }}
+                source={{uri: superImage.currentImage().image.src }}
+                resizeMode={'contain'}
+              />
+            } 
+        />
         </View>
       </View>
 
