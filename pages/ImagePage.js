@@ -7,7 +7,6 @@ import {
   View,
   StyleSheet,
   PanResponder,
-  Modal,
   Alert,
   Text,
   Image,
@@ -21,12 +20,10 @@ import SuperImage from '../utils/SuperImage.js';
 
 export default function ImagePage({ route, navigation }) {
   const { image, name } = route.params;
-
-  console.log("initializing with:", name);
+  // 'name' is generally undefined here.
 
   // Create an instance of SuperImage
   const superImage = useRef(new SuperImage(image)).current;
-  console.log("created superimage");
 
   const pan = useRef(new Animated.ValueXY()).current;
   const currentX = useRef(0);
@@ -37,6 +34,8 @@ export default function ImagePage({ route, navigation }) {
   // calculating actual width and height of touch area
   const xMax = Dimensions.get("window").width / 2 - xPadding;
   const yMax = Dimensions.get("window").height / 6 + 125;
+
+  // total dimensions of window.
 
   const panResponder = useRef(
     PanResponder.create({
@@ -85,35 +84,9 @@ export default function ImagePage({ route, navigation }) {
     pan.setValue({ x: currentX.current, y: newY });
   };
 
-  const [modalVisible, setModalVisible] = useState(false);
   return (
     <View style={styles.container}>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-              {image.title}: {"\n"}
-              {image.description}
-            </Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={styles.textStyle}>CLOSE</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-      <View style={styles.container}>
-        {/* Preventing the dot from going out of bounds       */}
+      {/* Preventing the dot from going out of bounds       */}
         <Animated.View
           style={{
             transform: [
@@ -149,12 +122,11 @@ export default function ImagePage({ route, navigation }) {
           }}
         >
        <Image 
-          style={styles.tinyLogo}
+          style={styles.image}
           source={{ uri: superImage.currentImage().image.src }} 
        />
         </View>
       </View>
-    </View>
   );
 }
 
@@ -183,8 +155,10 @@ const styles = StyleSheet.create({
     zIndex: -1,
     elevation: -1,
     position: "absolute",
+    borderWidth: 2,
+    borderColor: "#F0F"
   },
-  tinyLogo: {
+  image: {
     flex: 1,
     width: null,
     height: null,
@@ -196,21 +170,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 2.5,
-    shadowRadius: 10,
-    elevation: 10,
   },
   button: {
     padding: 5,
@@ -231,10 +190,6 @@ const styles = StyleSheet.create({
   textStyle: {
     color: "white",
     fontWeight: "bold",
-    textAlign: "center",
-  },
-  modalText: {
-    marginBottom: 15,
     textAlign: "center",
   },
   centeredView: {
