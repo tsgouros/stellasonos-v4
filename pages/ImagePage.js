@@ -20,7 +20,7 @@ import SuperImage from '../utils/SuperImage.js';
 
 export default function ImagePage({ route, navigation }) {
   const { image, name } = route.params;
-  // 'name' is generally undefined here.
+  // 'name' seems generally undefined here.
 
   // Create an instance of SuperImage
   const superImage = useRef(new SuperImage(image)).current;
@@ -29,11 +29,9 @@ export default function ImagePage({ route, navigation }) {
   const currentX = useRef(0);
   const currentY = useRef(0);
 
-  const xPadding = 45;
-
-  // calculating actual width and height of touch area
-  const xMax = Dimensions.get("window").width / 2 - xPadding;
-  const yMax = Dimensions.get("window").height / 6 + 125;
+  // calculate actual width and height of touch area
+  const xMax = Dimensions.get("window").width/2;
+  const yMax = Dimensions.get("window").height/2;
 
   // total dimensions of window.
 
@@ -72,17 +70,6 @@ export default function ImagePage({ route, navigation }) {
   // update current x and y values in the state for later
   pan.x.addListener(({ value }) => { currentX.current = value; });
   pan.y.addListener(({ value }) => { currentY.current = value; });
-  const handleX = (delta) => {
-    var newX =
-      currentX.current + delta > xMax ? xMax : 
-        currentX.current + delta < -xMax ? -xMax : currentX.current + delta;
-    pan.setValue({ x: newX, y: currentY.current });
-  };
-  const handleY = (delta) => {
-    var newY = currentY.current + delta > yMax ? yMax : 
-        currentY.current + delta < -yMax ? -yMax : currentY.current + delta;
-    pan.setValue({ x: currentX.current, y: newY });
-  };
 
   return (
     <View style={styles.container}>
@@ -118,13 +105,24 @@ export default function ImagePage({ route, navigation }) {
               x: event.nativeEvent.locationX - xMax - 20,
               y: event.nativeEvent.locationY - yMax - 20,
             });
-            console.log("event:",event.nativeEvent.pageX, event.nativeEvent.pageY, event.nativeEvent.locationX, event.nativeEvent.locationY, yMax, xMax,  );
+            console.log("event:",
+                        "pageX:",event.nativeEvent.pageX.toFixed(2), 
+                        "pageY:",event.nativeEvent.pageY.toFixed(2), 
+                        "locX:",event.nativeEvent.locationX.toFixed(2), 
+                        "locY:",event.nativeEvent.locationY.toFixed(2), 
+                        "xMax:",xMax, 
+                        "yMax:",yMax,
+                        "panX:",pan.x._value.toFixed(2),
+                        "panY:",pan.y._value.toFixed(2),
+                        Dimensions.get("window").width,
+                        Dimensions.get("window").height,
+                       );
           }}
         >
-       <Image 
-          style={styles.image}
-          source={{ uri: superImage.currentImage().image.src }} 
-       />
+         <Image 
+            style={styles.image}
+            source={{ uri: superImage.currentImage().image.src }} 
+         />
         </View>
       </View>
   );
@@ -136,19 +134,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  titleText: {
-    fontSize: 14,
-    lineHeight: 24,
-    fontWeight: "bold",
-  },
   circle: {
     height: 40,
     width: 40,
-    backgroundColor: "blue",
+    backgroundColor: "pink",
     borderRadius: 50,
   },
   imageContainer: {
-    width: Dimensions.get("window").width - 50,
+    width: Dimensions.get("window").width,
     height: Dimensions.get("window").height / 1.3,
     backgroundColor: "#000",
     margin: 0,
@@ -165,37 +158,5 @@ const styles = StyleSheet.create({
     margin: 0,
     maxHeight: "100%",
     maxWidth: "100%",
-  },
-  absolute: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button: {
-    padding: 5,
-    elevation: 2,
-    marginTop: 0,
-  },
-  buttonClose: {
-    backgroundColor: "black",
-    backgroundColor: "rgba(11, 127, 171, 0.7)",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
 });
