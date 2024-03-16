@@ -31,38 +31,6 @@ export default function ImagePage({ route, navigation }) {
   const xMax = Dimensions.get("window").width/2;
   const yMax = Dimensions.get("window").height/2;
 
-  // total dimensions of window.
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => true,
-
-      // prevent the dot (point of interest) from moving out of
-      // bounds with simple ternary operators
-      onPanResponderGrant: (e, r) => {
-        pan.setOffset({
-          x: pan.x._value > xMax ? xMax : 
-            pan.x._value < -xMax ? -xMax : pan.x._value,
-          y: pan.y._value > yMax ? yMax : 
-            pan.y._value < -yMax ? -yMax : pan.y._value,
-        });
-      },
-
-      // panResponder calls superImage.play during movements
-      onPanResponderMove: (e, gestureState) => {
-        console.log("playing........");
-        superImage.play(gestureState.dx, gestureState.dy);
-        Animated.event([null, { dx: pan.x, dy: pan.y }], 
-                       { useNativeDriver: false })(e, gestureState);
-      },
-
-      onPanResponderRelease: (e, r) => {
-        pan.flattenOffset();
-      },
-    })
-  ).current;
-
   return (
     <View style={styles.container}>
       {/* Preventing the dot from going out of bounds       */}
@@ -85,7 +53,6 @@ export default function ImagePage({ route, navigation }) {
               },
             ],
           }}
-          {...panResponder.panHandlers}
         >
           <View style={styles.circle} />
         </Animated.View>
