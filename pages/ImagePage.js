@@ -26,8 +26,6 @@ export default function ImagePage({ route, navigation }) {
   const superImage = useRef(new SuperImage(image)).current;
 
   const pan = useRef(new Animated.ValueXY()).current;
-  const currentX = useRef(0);
-  const currentY = useRef(0);
 
   // calculate actual width and height of touch area
   const xMax = Dimensions.get("window").width/2;
@@ -61,15 +59,9 @@ export default function ImagePage({ route, navigation }) {
 
       onPanResponderRelease: (e, r) => {
         pan.flattenOffset();
-        currentY.current = pan.y._value;
-        currentX.current = pan.x._value;
       },
     })
   ).current;
-
-  // update current x and y values in the state for later
-  pan.x.addListener(({ value }) => { currentX.current = value; });
-  pan.y.addListener(({ value }) => { currentY.current = value; });
 
   return (
     <View style={styles.container}>
