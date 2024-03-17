@@ -1,12 +1,10 @@
 import React, { useRef, useState } from "react";
-import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import {
   Animated,
   Dimensions,
   View,
   StyleSheet,
-  PanResponder,
   Alert,
   Text,
   Image,
@@ -28,60 +26,59 @@ export default function ImagePage({ route, navigation }) {
   const pan = useRef(new Animated.ValueXY()).current;
 
   // calculate actual width and height of touch area
-  const xMax = Dimensions.get("window").width/2;
-  const yMax = Dimensions.get("window").height/2;
+  const xMax = Dimensions.get("window").width;
+  const yMax = Dimensions.get("window").height;
 
   return (
     <View style={styles.container}>
-      {/* Preventing the dot from going out of bounds       */}
-        <Animated.View
-          style={{
-            transform: [
-              {
-                translateX: pan.x.interpolate({
-                  inputRange: [-xMax, xMax],
-                  outputRange: [-xMax, xMax],
-                  extrapolate: "clamp",
-                }),
-              },
-              {
-                translateY: pan.y.interpolate({
-                  inputRange: [-yMax, yMax],
-                  outputRange: [-yMax, yMax],
-                  extrapolate: "clamp",
-                }),
-              },
-            ],
-          }}
-        >
-          <View style={styles.circle} />
-        </Animated.View>
         <View
           style={styles.imageContainer}
           onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
+          onResponderTerminationRequest={() => false}
           onResponderMove={(event) => {            
             pan.setValue({
-              x: event.nativeEvent.locationX - xMax - 20,
-              y: event.nativeEvent.locationY - yMax - 20,
+              x: event.nativeEvent.pageX - 25,
+              y: event.nativeEvent.pageY + 25,
             });
-            console.log("event:",
-                        "pageX:",event.nativeEvent.pageX.toFixed(2), 
-                        "pageY:",event.nativeEvent.pageY.toFixed(2), 
-                        "locX:",event.nativeEvent.locationX.toFixed(2), 
-                        "locY:",event.nativeEvent.locationY.toFixed(2), 
-                        "xMax:",xMax, 
-                        "yMax:",yMax,
-                        "panX:",pan.x._value.toFixed(2),
-                        "panY:",pan.y._value.toFixed(2),
-                        Dimensions.get("window").width,
-                        Dimensions.get("window").height,
-                       );
+            superImage.play(pan.x, pan.y);
           }}
         >
          <Image 
             style={styles.image}
             source={{ uri: superImage.currentImage().image.src }} 
          />
+        <Animated.View
+          style={{
+            transformOrigin: 'top left',
+            transform: [
+              {
+                translateX: pan.x.interpolate({
+                  inputRange: [0, xMax],
+                  outputRange: [0, xMax],
+                  extrapolate: "clamp",
+                }),
+              },
+              {
+                translateY: pan.y.interpolate({
+                  inputRange: [0, 110, yMax-110, yMax],
+                  outputRange: [-yMax+200, -yMax+200, 0, 0],
+                  extrapolate: "clamp",
+                }),
+              },
+            ],
+          }}
+    onStartShouldSetResponder={(event) => {
+      pan.setValue({x: event.nativeEvent.pageX - 25,
+                    y: event.nativeEvent.pageY + 25,
+                   });
+      false }}
+    onMoveShouldSetResponder={(evt) => false }
+    onResponderReject={(event) => {}}
+    onResponderGrant={(event) => {}}
+        >
+          <View style={styles.circle} />
+        </Animated.View>
         </View>
       </View>
   );
