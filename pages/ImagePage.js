@@ -41,7 +41,7 @@ export default function ImagePage({ route, navigation }) {
               x: event.nativeEvent.pageX - 25,
               y: event.nativeEvent.pageY + 25,
             });
-            superImage.play(pan.x, pan.y);
+            superImage.play(pan.x._value, pan.y._value);
           }}
         >
          <Image 

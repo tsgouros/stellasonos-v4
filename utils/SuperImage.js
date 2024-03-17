@@ -97,7 +97,7 @@ class SuperImage {
   // haptic feedback based on segment
   play(x, y) {
     // need to incorporate logic to check the segmentation data
-    console.log("playing at:", x, y);
+    console.log("playing at:", x.toFixed(2), y.toFixed(2));
 
     const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 
           'impactHeavy';
