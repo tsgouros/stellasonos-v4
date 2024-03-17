@@ -1,4 +1,4 @@
-import { Animated, PanResponder } from 'react-native';
+import { Animated } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Player } from '@react-native-community/audio-toolkit';
 
@@ -65,9 +65,6 @@ class SuperImage {
     // placeholder for segmented image data
     /// this.images['segmented'] = null;
     
-    // initialize PanResponder for drag interactions
-    this.initPanResponder();
-
     // segmentation logic will populate this.segmentedImage with processed data
     this.performSegmentation();
   }
@@ -95,32 +92,15 @@ class SuperImage {
     console.log("getting segmentation records");
   }
 
-  initPanResponder() {
-    this.panResponder = PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event(
-        [null, { dx: this.pan.x, dy: this.pan.y }],
-        {
-          useNativeDriver: false,
-          listener: (event, gestureState) => {
-            this.play(gestureState.dx, gestureState.dy);
-          },
-        }
-      ),
-      onPanResponderRelease: () => {
-        this.pan.flattenOffset();
-        this.stopSound();
-      },
-    });
-  }
-
   // Depending on where the user interacts with the image (determined
   // by the gesture's x, y coordinates) to trigger different sounds or
   // haptic feedback based on segment
   play(x, y) {
     // need to incorporate logic to check the segmentation data
+    console.log("playing at:", x, y);
 
-    const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 'impactHeavy';
+    const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 
+          'impactHeavy';
     if (this.canTriggerVibration) {
       console.log(`Triggering Haptic with style: ${style}`);
       this.triggerHaptic(style);
