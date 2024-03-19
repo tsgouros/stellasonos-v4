@@ -12,7 +12,7 @@ import {
   Pressable,
 } from "react-native";
 
-import { Grayscale } from "react-native-image-filter-kit";
+import { Grayscale, Threshold } from "react-native-image-filter-kit";
 
 import SuperImage from '../utils/SuperImage.js';
 
@@ -29,6 +29,18 @@ export default function ImagePage({ route, navigation }) {
   const xMax = Dimensions.get("window").width;
   const yMax = Dimensions.get("window").height;
 
+// Q: Can we add a background image with the same properties as the image
+// and do the segmentation on it? With a fully opaque image in front
+// of it, who would know? 
+//
+// A: Apparently we can, see below. The order of objects within a view
+// apparently matters, so put the image you want to see (and its
+// accompanying Animated.View) first, followed by the
+// ImageBackground. (Not sure it matters whether the second is Image
+// or ImageBackground, so if the latter gives trouble, try the
+// former.)
+
+
   return (
     <View style={styles.container}>
         <View
@@ -44,10 +56,10 @@ export default function ImagePage({ route, navigation }) {
             superImage.play(pan.x._value, pan.y._value);
           }}
         >
-         <Image 
-            style={styles.image}
-            source={{ uri: superImage.currentImage().image.src }} 
-         />
+      <Image
+          style={{ width: xMax*2, height: yMax }}
+          source={{uri: superImage.currentImage().image.src }}
+      /> 
         <Animated.View
           style={{
             transformOrigin: 'top left',
@@ -79,6 +91,16 @@ export default function ImagePage({ route, navigation }) {
         >
           <View style={styles.circle} />
         </Animated.View>
+      <Threshold
+      image={<Grayscale
+        image={
+           <Image
+          style={{ width: xMax*2, height: yMax }}
+          source={{uri: superImage.currentImage().image.src }}
+            />} 
+      />}
+       amount={ 4 }
+      />
         </View>
       </View>
   );
