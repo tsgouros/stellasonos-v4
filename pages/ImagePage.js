@@ -9,8 +9,21 @@ import {
   Text,
   Image,
   ImageBackground,
+  NativeModules,
   Pressable,
 } from "react-native";
+
+import RNFetchBlob from 'rn-fetch-blob';
+
+console.log("777", Object.keys(RNFetchBlob.fs));
+
+const { fs, fetch, wrap } = RNFetchBlob;
+
+import { getPixels } from 'get-pixels';
+
+import { Dirs } from 'react-native-file-access';
+
+console.log("DIRS:", `${Dirs.CacheDir}`);
 
 import { Grayscale, Threshold } from "react-native-image-filter-kit";
 
@@ -25,21 +38,11 @@ export default function ImagePage({ route, navigation }) {
 
   const pan = useRef(new Animated.ValueXY()).current;
 
+  var blob;
+
   // calculate actual width and height of touch area
   const xMax = Dimensions.get("window").width;
   const yMax = Dimensions.get("window").height;
-
-// Q: Can we add a background image with the same properties as the image
-// and do the segmentation on it? With a fully opaque image in front
-// of it, who would know? 
-//
-// A: Apparently we can, see below. The order of objects within a view
-// apparently matters, so put the image you want to see (and its
-// accompanying Animated.View) first, followed by the
-// ImageBackground. (Not sure it matters whether the second is Image
-// or ImageBackground, so if the latter gives trouble, try the
-// former.)
-
 
   return (
     <View style={styles.container}>
@@ -56,10 +59,26 @@ export default function ImagePage({ route, navigation }) {
             superImage.play(pan.x._value, pan.y._value);
           }}
         >
-      <Image
+      <Threshold
+        onFilteringError={ (event) => { console.log("+++",event); } }
+        onExtractImage={ (event) => { 
+          console.log("===",event.nativeEvent.uri, event.nativeEvent.target,Object.keys(event.nativeEvent));
+          RNFetchBlob.fs.readFile(event.nativeEvent.uri, 'base64')
+          .then((data) => {
+            console.log("blob:", data);
+            //blob = atob(data);
+          });
+        } }
+        extractImageEnabled={ true }
+      image={<Grayscale
+        image={
+           <Image
           style={{ width: xMax*2, height: yMax }}
           source={{uri: superImage.currentImage().image.src }}
-      /> 
+            />} 
+      />}
+       amount={ 4 }
+      />
         <Animated.View
           style={{
             transformOrigin: 'top left',
@@ -91,16 +110,6 @@ export default function ImagePage({ route, navigation }) {
         >
           <View style={styles.circle} />
         </Animated.View>
-      <Threshold
-      image={<Grayscale
-        image={
-           <Image
-          style={{ width: xMax*2, height: yMax }}
-          source={{uri: superImage.currentImage().image.src }}
-            />} 
-      />}
-       amount={ 4 }
-      />
         </View>
       </View>
   );
