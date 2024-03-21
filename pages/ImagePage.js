@@ -15,11 +15,23 @@ import {
 
 import RNFetchBlob from 'rn-fetch-blob';
 
+import * as _Jimp from 'jimp';
+console.log(">>>>>>>", _Jimp, (typeof self !== 'undefined'), (self.Jimp || _Jimp));
+const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
+const jp = new Jimp(256, 256, "#000000", (err, image) => {
+  console.log("+++", err);
+});
+console.log("----", Object.keys(_Jimp))
+
+
+//import 'jimp';
+//const { Jimp } = window;
+
+
+console.log("Jimp>>>", Jimp, Object.keys(Jimp.default));
 console.log("777", Object.keys(RNFetchBlob.fs));
 
 const { fs, fetch, wrap } = RNFetchBlob;
-
-import { getPixels } from 'get-pixels';
 
 import { Dirs } from 'react-native-file-access';
 
@@ -63,11 +75,14 @@ export default function ImagePage({ route, navigation }) {
         onFilteringError={ (event) => { console.log("+++",event); } }
         onExtractImage={ (event) => { 
           console.log("===",event.nativeEvent.uri, event.nativeEvent.target,Object.keys(event.nativeEvent));
-          RNFetchBlob.fs.readFile(event.nativeEvent.uri, 'base64')
-          .then((data) => {
-            console.log("blob:", data);
-            //blob = atob(data);
-          });
+          Jimp.read(event.nativeEvent.uri)
+            .then((data) => {
+              blob = data; // Can add .resize() etc here.
+              console.log("***dimensions",data.bitmap.width, data.bitmap.height);
+            })
+            .catch((err) => {
+              console.error(err);
+            });
         } }
         extractImageEnabled={ true }
       image={<Grayscale
