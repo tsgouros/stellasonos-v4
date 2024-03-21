@@ -13,29 +13,18 @@ import {
   Pressable,
 } from "react-native";
 
+console.log("====================================");
+
+// This gets a blob of data from the PNG file written by
+// react-native-filter-kit.
 import RNFetchBlob from 'rn-fetch-blob';
+const { fs } = RNFetchBlob;
 
-import * as _Jimp from 'jimp';
-console.log(">>>>>>>", _Jimp, (typeof self !== 'undefined'), (self.Jimp || _Jimp));
-const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
-const jp = new Jimp(256, 256, "#000000", (err, image) => {
-  console.log("+++", err);
-});
-console.log("----", Object.keys(_Jimp))
+// The blob appears to come as a base64 string. Buffer can decode that.
+import { Buffer } from 'buffer';
 
-
-//import 'jimp';
-//const { Jimp } = window;
-
-
-console.log("Jimp>>>", Jimp, Object.keys(Jimp.default));
-console.log("777", Object.keys(RNFetchBlob.fs));
-
-const { fs, fetch, wrap } = RNFetchBlob;
-
-import { Dirs } from 'react-native-file-access';
-
-console.log("DIRS:", `${Dirs.CacheDir}`);
+// A library whose job to unpack a PNG-encoded blob.
+import * as png from '@vivaxy/png';
 
 import { Grayscale, Threshold } from "react-native-image-filter-kit";
 
@@ -51,6 +40,7 @@ export default function ImagePage({ route, navigation }) {
   const pan = useRef(new Animated.ValueXY()).current;
 
   var blob;
+  var imageData;
 
   // calculate actual width and height of touch area
   const xMax = Dimensions.get("window").width;
@@ -75,14 +65,16 @@ export default function ImagePage({ route, navigation }) {
         onFilteringError={ (event) => { console.log("+++",event); } }
         onExtractImage={ (event) => { 
           console.log("===",event.nativeEvent.uri, event.nativeEvent.target,Object.keys(event.nativeEvent));
-          Jimp.read(event.nativeEvent.uri)
-            .then((data) => {
-              blob = data; // Can add .resize() etc here.
-              console.log("***dimensions",data.bitmap.width, data.bitmap.height);
-            })
-            .catch((err) => {
-              console.error(err);
-            });
+          // event.nativeEvent.uri is the file written by filter-kit.
+          RNFetchBlob.fs.readFile(event.nativeEvent.uri, 'base64')
+          .then((data) => {
+            // Use Buffer to decode the base64 and png to get the image data.
+            imageData = png.decode(Buffer.from(data, 'base64'));
+            console.log("image data:", Object.keys(imageData));
+            // The size checks out from the original image. 3/21/24.
+            console.log("image size", imageData.width, imageData.height, imageData.depth, imageData.colorType);
+            // Should probably clean the cache here.
+          });
         } }
         extractImageEnabled={ true }
       image={<Grayscale
