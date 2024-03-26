@@ -27,9 +27,10 @@ export default function Home({ navigation }) {
         onSwipedRight={(cardIndex) => {
           navigateToImagePage(images.images[cardIndex], navigation);
         }}
+        goBackToPreviousCardOnSwipeTop={ true }
         onSwipedTop={(cardIndex) => {
-          navigateToImagePage(images.images[cardIndex], navigation);
-        }}
+          console.log("cardIndex:", cardIndex);
+        } }
         onTapCard={(cardIndex) => {
           navigateToImagePage(images.images[cardIndex], navigation);
         }}
