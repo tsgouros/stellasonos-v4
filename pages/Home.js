@@ -28,8 +28,9 @@ export default function Home({ navigation }) {
           navigateToImagePage(images.images[cardIndex], navigation);
         }}
         goBackToPreviousCardOnSwipeTop={ true }
+        showSecondCard={ false }
         onSwipedTop={(cardIndex) => {
-          console.log("cardIndex:", cardIndex);
+          console.log("swiped up cardIndex:", cardIndex);
         } }
         onTapCard={(cardIndex) => {
           navigateToImagePage(images.images[cardIndex], navigation);
