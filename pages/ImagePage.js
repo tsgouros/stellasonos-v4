@@ -26,7 +26,15 @@ import { Buffer } from 'buffer';
 // A library whose job to unpack a PNG-encoded blob.
 import * as png from '@vivaxy/png';
 
-import { Grayscale, Threshold } from "react-native-image-filter-kit";
+import * as _Jimp from 'jimp';
+const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
+// const jp = new Jimp(256, 256, "#000000", (err, image) => {
+//   console.log("EEEEEEE", err);
+// });
+// console.log("----", Object.keys(jp.bitmap));
+
+import { Grayscale, Threshold, Brightness, GaussianBlur, BoxBlur, Sharpen,
+         cleanExtractedImagesCache} from "react-native-image-filter-kit";
 
 import SuperImage from '../utils/SuperImage.js';
 
@@ -39,6 +47,10 @@ export default function ImagePage({ route, navigation }) {
 
   const pan = useRef(new Animated.ValueXY()).current;
 
+  const cursorState = useRef({ "prevX": 0,
+                               "prevY": 0,
+                               "prevTimeStamp": 0, }).current;
+
   var blob;
   var imageData;
 
@@ -50,6 +62,17 @@ export default function ImagePage({ route, navigation }) {
     <View style={styles.container}>
         <View
           style={styles.imageContainer}
+          onResponderGrant={(event) => { 
+            // Look for a double click (half-second)
+            if (Math.abs(event.touchHistory.mostRecentTimeStamp - 
+                         cursorState.prevTimeStamp) < 500) {
+              navigation.goBack();
+            }
+
+            cursorState.prevX = event.nativeEvent.pageX;
+            cursorState.prevY = event.nativeEvent.pageY;
+            cursorState.prevTimeStamp = event.touchHistory.mostRecentTimeStamp;
+          } }
           onStartShouldSetResponder={() => true}
           onMoveShouldSetResponder={() => true}
           onResponderTerminationRequest={() => false}
@@ -61,7 +84,7 @@ export default function ImagePage({ route, navigation }) {
             superImage.play(pan.x._value, pan.y._value);
           }}
         >
-      <Threshold
+      <Sharpen
         onFilteringError={ (event) => { console.log("+++",event); } }
         onExtractImage={ (event) => { 
           console.log("===",event.nativeEvent.uri, event.nativeEvent.target,Object.keys(event.nativeEvent));
@@ -72,19 +95,27 @@ export default function ImagePage({ route, navigation }) {
             imageData = png.decode(Buffer.from(data, 'base64'));
             console.log("image data:", Object.keys(imageData));
             // The size checks out from the original image. 3/21/24.
-            console.log("image size", imageData.width, imageData.height, imageData.depth, imageData.colorType);
+            console.log("image size", imageData.width, imageData.height, imageData.depth, imageData.colorType, typeof imageData.data[1]);
+            jp = new Jimp(imageData.width, imageData.height, 
+                          (e, j) => { 
+                            console.log("JIMP success?", e, Object.keys(j.bitmap), j.bitmap.width, j.bitmap.height, typeof j.bitmap.data[1]);
+
+                          });
+
             // Should probably clean the cache here.
+            cleanExtractedImagesCache();
           });
         } }
-        extractImageEnabled={ true }
-      image={<Grayscale
-        image={
-           <Image
-          style={{ width: xMax*2, height: yMax }}
-          source={{uri: superImage.currentImage().image.src }}
-            />} 
-      />}
-       amount={ 4 }
+    extractImageEnabled={ true }
+    image={<GaussianBlur
+           radius={ 1 }
+           image={
+               <Image
+             style={{ width: xMax, height: yMax }}
+             source={{uri: superImage.currentImage().image.src }}
+               />} 
+           />}
+    amount={ 1 }
       />
         <Animated.View
           style={{
