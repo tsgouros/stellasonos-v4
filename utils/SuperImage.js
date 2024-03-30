@@ -6,37 +6,42 @@ import { Player } from '@react-native-community/audio-toolkit';
 // images, in the 'SuperImage' class.
 class SubImage {
 
-  constructor(image) {
-    console.log("initializing SubImage");
-    this.image = image; // full image object passed from ImagePage
+  constructor(src, description) {
+    console.log("initializing SubImage", src, description);
+    this.src = src;
+    this.description = description;
   }
 
   clone = async function() {
-    return(new SubImage(this.image));
+    return(new SubImage(this.src, this.description));
   }
 }
 
 
 // This class is meant to hold a whole collection of SubImages, each
 // corresponding to some component of an astronomical object. So we
-// can choose which one to display.
+// can choose which one to display. The 'image' object it accepts is 
+// an entry in the images.json file, and it contains a master URL, and
+// also a collection of subImage URLs.
 class SuperImage {
-  constructor(image, name="") {
+  constructor(complexImage, name="") {
 
-    // Ultimately, the constructor ought to begin with a collection of
-    // images and a description of how to portray them. For now, it
-    // has a single image input, from which we make a single-image
-    // collection. So this part is temporary.
-    var subImage = new SubImage(image);
-    var imageKey=name;
-    if (imageKey == "") imageKey = "1"; 
-    this.images = new Array();  // a collection of SubImage objects.
-    this.images[imageKey] = subImage;   // Load the first one.
-    console.log("initializing superImage", Object.keys(this.images));
-    this.currentImageKey = Object.keys(this.images)[0];
-    console.log("first image is called:", this.currentImageKey);
-    // Previous lines are temporary.
+    console.log("initializing SuperImage", Object.keys(complexImage));
+    this.masterSrc = complexImage.src;
+    this.URL = complexImage.url;
+    this.description = complexImage.description
+    this.id = complexImage.id;
+    this.layers = new Array();
 
+    for (var i = 0; i < complexImage.layers.length; i++) {
+      this.layers[complexImage.layers[i].id] = 
+        new SubImage(complexImage.layers[i].src, complexImage.layers[i].layer);
+    }
+
+    // Start at the first image key.
+    this.currentImageKey = Object.keys(this.layers)[0];
+    console.log("complexImage starting with:", this.currentImageKey);
+    
     // A single segment record corresponds to a region of the
     // segmented image. It records a measure of the segment's size and
     // color, and also an index into the tables for the sound and
@@ -63,7 +68,7 @@ class SuperImage {
     });
 
     // placeholder for segmented image data
-    /// this.images['segmented'] = null;
+    /// this.layers['segmented'] = null;
     
     // segmentation logic will populate this.segmentedImage with processed data
     this.performSegmentation();
@@ -71,13 +76,13 @@ class SuperImage {
 
   addImage(image, name="") {
     var imageKey = name;
-    if (imageKey == "") imageKey=this.images.length.toString();
+    if (imageKey == "") imageKey=this.layers.length.toString();
     
-    this.images[imageKey] = image;
+    this.layers[imageKey] = image;
   }
 
   currentImage() {
-    return(this.images[this.currentImageKey]);
+    return(this.layers[this.currentImageKey]);
   }
   
   performSegmentation() {
@@ -158,15 +163,15 @@ direct pixel manipulation is unsupported in react native because native interfac
 all of which are in the javascript code: 
 
 gray scale conversion
-this.images['segmented'] = await this.images[imageKey].clone();
-this.images['segmented'].image = this.images[imageKey].image.grey();
+this.layers['segmented'] = await this.layers[imageKey].clone();
+this.layers['segmented'].image = this.layers[imageKey].image.grey();
 
 convolution
 this.img = this.img
   .resize({width: 550, height: 550})
   .convolution(kernelArray)
   .erode({number: 1}).dilate({number: 1})
-  .resize({width: this.images[imageKey].image.width, height: this.images[imageKey].image.height})
+  .resize({width: this.layers[imageKey].image.width, height: this.layers[imageKey].image.height})
   .mask({threshold: 0.25, invert: true});
 
 flood fill 

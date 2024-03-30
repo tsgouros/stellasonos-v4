@@ -63,7 +63,6 @@ export default function ImagePage({ route, navigation }) {
 
   var imageWidth, imageHeight;
 
-  console.log("***H,W:", imageWidth, imageHeight);
 
   return (
       <View
@@ -120,7 +119,7 @@ export default function ImagePage({ route, navigation }) {
            image={
                <Image
              style={styles.image}
-             source={{uri: superImage.currentImage().image.src }}
+             source={{uri: superImage.currentImage().src }}
                />} 
            />}
     amount={ 1 }
