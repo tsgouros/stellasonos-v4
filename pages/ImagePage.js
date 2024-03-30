@@ -61,9 +61,6 @@ export default function ImagePage({ route, navigation }) {
   //const imageWidth = useRef(touchAreaWidth).current;
   //const imageHeight = useRef(touchAreaHeight).current;
 
-  var imageWidth, imageHeight;
-
-
   return (
       <View
     style={styles.imageContainer}
@@ -92,37 +89,30 @@ export default function ImagePage({ route, navigation }) {
       <Sharpen
     onFilteringError={ (event) => { console.log("+++",event); } }
     onExtractImage={ (event) => { 
-      console.log("===",event.nativeEvent.uri, event.nativeEvent.target,Object.keys(event.nativeEvent));
+
       // event.nativeEvent.uri is the file written by filter-kit.
       RNFetchBlob.fs.readFile(event.nativeEvent.uri, 'base64')
         .then((data) => {
           // Use Buffer to decode the base64 and png to get the image data.
           imageData = png.decode(Buffer.from(data, 'base64'));
-          console.log("image data:", Object.keys(imageData));
-          imageWidth = imageData.width;
-          imageHeight = imageData.height;
-          // The size checks out from the original image. 3/21/24.
-          console.log("image size", imageData.width, imageData.height, imageData.depth, imageData.colorType, typeof imageData.data[1]);
-          jp = new Jimp(imageData.width, imageData.height, 
-                        (e, j) => { 
-                          console.log("JIMP success?", e, Object.keys(j.bitmap), j.bitmap.width, j.bitmap.height, typeof j.bitmap.data[1]);
 
-                        });
+          // Pass the image data to the superImage object.
+          superImage.performSegmentation(imageData);
 
           // Should probably clean the cache here.
           cleanExtractedImagesCache();
         });
     } }
     extractImageEnabled={ true }
-    image={<GaussianBlur
-           radius={ 1 }
+    // image={<GaussianBlur
+    //        radius={ 1 }
            image={
                <Image
              style={styles.image}
              source={{uri: superImage.currentImage().src }}
                />} 
-           />}
-    amount={ 1 }
+    //        />}
+    // amount={ 1 }
       />
       <Animated.View
     style={{

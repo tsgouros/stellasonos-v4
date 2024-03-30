@@ -42,6 +42,11 @@ class SuperImage {
     this.currentImageKey = Object.keys(this.layers)[0];
     console.log("complexImage starting with:", this.currentImageKey);
     
+    // This will be our segmentation record. Ultimately, the segmented
+    // image should just be another SubImage in the layers array, but
+    // later.
+    this.segmentBitmap = null;
+
     // A single segment record corresponds to a region of the
     // segmented image. It records a measure of the segment's size and
     // color, and also an index into the tables for the sound and
@@ -70,8 +75,6 @@ class SuperImage {
     // placeholder for segmented image data
     /// this.layers['segmented'] = null;
     
-    // segmentation logic will populate this.segmentedImage with processed data
-    this.performSegmentation();
   }
 
   addImage(image, name="") {
@@ -85,9 +88,14 @@ class SuperImage {
     return(this.layers[this.currentImageKey]);
   }
   
-  performSegmentation() {
+  performSegmentation(imageData) {
     console.log("Performing segmentation on the image");
-    // segmentation logic here
+    this.segmentBitmap = imageData.bitmap
+
+    jp = new Jimp(imageData.width, imageData.height, 
+                  (e, j) => { 
+                    console.log("JIMP success ***?", e, Object.keys(j.bitmap), j.bitmap.width, j.bitmap.height, typeof j.bitmap.data[1]);
+                  });
   }
 
   // Retrieve one or more of the segment records corresponding to this
