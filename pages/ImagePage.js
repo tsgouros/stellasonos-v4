@@ -43,6 +43,12 @@ export default function ImagePage({ route, navigation }) {
             });
             superImage.play(pan.x._value, pan.y._value);
           }}
+          // onResponderMove={(event) => {
+          //   const x = event.nativeEvent.pageX - 25;
+          //   const y = event.nativeEvent.pageY + 25;
+          //   pan.setValue({ x: x, y: y });
+          //   superImage.play(x, y);
+          // }}
         >
          <Image 
             style={styles.image}
@@ -116,3 +122,5 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
   },
 });
+
+ImagePage.js
