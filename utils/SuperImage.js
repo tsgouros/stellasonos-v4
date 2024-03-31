@@ -1,6 +1,9 @@
-import { Animated } from 'react-native';
+import { Animated, Dimensions } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Player } from '@react-native-community/audio-toolkit';
+
+import * as _Jimp from 'jimp';
+const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
 
 // Class to hold a single image, meant to be part of a stack of
 // images, in the 'SuperImage' class.
@@ -45,7 +48,7 @@ class SuperImage {
     // This will be our segmentation record. Ultimately, the segmented
     // image should just be another SubImage in the layers array, but
     // later.
-    this.segmentBitmap = null;
+    this.segmentData = null;
 
     // A single segment record corresponds to a region of the
     // segmented image. It records a measure of the segment's size and
@@ -87,15 +90,107 @@ class SuperImage {
   currentImage() {
     return(this.layers[this.currentImageKey]);
   }
-  
-  performSegmentation(imageData) {
-    console.log("Performing segmentation on the image");
-    this.segmentBitmap = imageData.bitmap
 
-    jp = new Jimp(imageData.width, imageData.height, 
-                  (e, j) => { 
-                    console.log("JIMP success ***?", e, Object.keys(j.bitmap), j.bitmap.width, j.bitmap.height, typeof j.bitmap.data[1]);
-                  });
+  // Accept window coordinates, return image coordinates.
+  getPos(x, y) { 
+    var yr = (this.win.totalHeight - this.win.winHeight)/2;
+    return { x: Math.round((x / this.win.winWidth) * this.win.imgWidth),
+             y: Math.round(((y - yr)/ this.win.winHeight) * this.win.imgHeight),
+           };
+    }
+  
+  async performSegmentation(imageData) {
+
+    // What are the actual dimensions of the displayed image, in pixels.
+    this.win = {
+      winWidth: Dimensions.get("window").width,
+      winHeight: (imageData.height / imageData.width) * 
+        Dimensions.get("window").width,
+      totalHeight: Dimensions.get("window").height,
+      imgWidth: imageData.width,
+      imgHeight: imageData.height,
+    }
+
+    this.segmentData = null;
+
+    console.log("Window thing:", this.win);
+
+    await new Jimp(
+      imageData.width, imageData.height, 
+      (error, jData) => { 
+        console.log("JIMP success ***!", error, Object.keys(imageData),Object.keys(jData.bitmap), jData.bitmap.width, jData.bitmap.height, typeof jData.bitmap.data[1], imageData.colorType, imageData.sRGB, imageData.data.length);
+        if (error) stop(error);
+
+        // Build a convolution array.
+        var kernelArray = Array.from(Array(5), () => new Array(5));
+        kernelArray[0] = [1/25, 1/25, 1/25, 1/25, 1/25];
+        kernelArray[1] = [1/25, 1/25, 1/25, 1/25, 1/25];
+        kernelArray[2] = [1/25, 1/25, 1/25, 1/25, 1/25];
+        kernelArray[3] = [1/25, 1/25, 1/25, 1/25, 1/25];
+        kernelArray[4] = [1/25, 1/25, 1/25, 1/25, 1/25];
+        
+        // res is just for debugging, remove it when you want.
+        var res
+
+        // 'result' is for transferring the output data to this.segmentData. 
+        // 'this' refers to something else inside the functions below.
+        var result = new Int16Array(jData.bitmap.width * jData.bitmap.height);
+        jData.scan(
+          0, 0, jData.bitmap.width, jData.bitmap.height, 
+          function (x, y, idx) {
+            // x, y is the position of this pixel on the image idx is
+            // the start position of this rgba tuple in the bitmap.
+            this.bitmap.data[idx + 0] = imageData.data[idx + 0]; // red
+            this.bitmap.data[idx + 1] = imageData.data[idx + 1]; // green 
+            this.bitmap.data[idx + 2] = imageData.data[idx + 2]; // blue
+            this.bitmap.data[idx + 3] = imageData.data[idx + 3]; // alpha
+
+            if (x == jData.bitmap.width - 1 && y == jData.bitmap.height - 1) {
+              // image scan finished, do first segmentation step.
+              res = jData
+                .clone()
+                .resize(500, 500)
+                .blur(5)
+                .convolute(kernelArray)
+                .resize(imageData.width, imageData.height)
+                .greyscale()
+              // Apply a threshold and inversion, while copying to output.
+                .scan(0, 0, jData.bitmap.width, jData.bitmap.height, 
+                      function(x, y, idx) {
+                        result[y * jData.bitmap.width + x] =
+                          this.bitmap.data[idx] > 50 ? 0 : -1;
+                      });
+            }
+
+          });
+
+        this.segmentData = result;
+
+        // console.log(">>>>>>>>>", 
+        //             imageData.data[6080],
+        //             imageData.data[6081],
+        //             imageData.data[6082],
+        //             imageData.data[6083],
+        //             res.bitmap.data[6080],
+        //             res.bitmap.data[6081],
+        //             res.bitmap.data[6082],
+        //             res.bitmap.data[6083],
+        //             this.segmentData[1520]);
+        // console.log(">>>>>>>>>", 
+        //             imageData.data[1500],
+        //             imageData.data[1501],
+        //             imageData.data[1502],
+        //             imageData.data[1503],
+        //             res.bitmap.data[1500],
+        //             res.bitmap.data[1501],
+        //             res.bitmap.data[1502],
+        //             res.bitmap.data[1503],
+        //             this.segmentData[375]);
+
+        // Other segmentation work goes here.
+        console.log("Done with segmentation, ready to rock.");
+      });
+
   }
 
   // Retrieve one or more of the segment records corresponding to this
@@ -109,8 +204,11 @@ class SuperImage {
   // by the gesture's x, y coordinates) to trigger different sounds or
   // haptic feedback based on segment
   play(x, y) {
-    // need to incorporate logic to check the segmentation data
-    console.log("playing at:", x.toFixed(2), y.toFixed(2));
+
+    // Check segmentation data
+    let pos = this.getPos(x, y)
+    console.log("playing at:", pos.x, pos.y,
+                this.segmentData[ pos.y * this.win.imgWidth + pos.x ]);
 
     const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 
           'impactHeavy';

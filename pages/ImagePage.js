@@ -26,13 +26,6 @@ import { Buffer } from 'buffer';
 // A library whose job to unpack a PNG-encoded blob.
 import * as png from '@vivaxy/png';
 
-import * as _Jimp from 'jimp';
-const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
-// const jp = new Jimp(256, 256, "#000000", (err, image) => {
-//   console.log("EEEEEEE", err);
-// });
-// console.log("----", Object.keys(jp.bitmap));
-
 import { Grayscale, Threshold, Brightness, GaussianBlur, BoxBlur, Sharpen,
          cleanExtractedImagesCache} from "react-native-image-filter-kit";
 
