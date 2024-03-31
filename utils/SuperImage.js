@@ -57,6 +57,9 @@ class SuperImage {
     // record to be used as a model. It is also the empty record
     // returned when there is no object at that pixel position. 
     this.segmentRecord = {sum: 0, color: 0, haptic: 0, sound: 0};
+    
+    // This is for processing the floodFill used in segmentation.
+    this.visited = null;
 
     // This is a collection of records corresponding to the objects in
     // an image. The zero record is the empty record.
@@ -98,7 +101,55 @@ class SuperImage {
              y: Math.round(((y - yr)/ this.win.winHeight) * this.win.imgHeight),
            };
     }
-  
+
+
+  // Given a bit position [i,j], this function does a flood fill on
+  // all the connected area, setting all those pixels to the input
+  // 'value' argument. The image being operated on is this.segmentedData.
+  floodFill(i, j, value) {
+    if ((i < 0) || (i >= this.win.imgWidth) || 
+        (j < 0) || (j >= this.win.imgHeight)) return(0);
+
+    var fillStack = [];
+
+    fillStack.push([i, j]);
+    var output = 0;
+
+    while(fillStack.length > 0) {
+      // Check the top of the stack.
+      var [icol, jrow] = fillStack.pop();
+      var index = jrow * this.win.imgWidth + icol;
+
+      // Check to see if we need to bother with this cell. Either the cell 
+      // is out of bounds, or was never our business, or it's already been 
+      // visited.
+      if ((icol < 0) || 
+          (icol >= this.win.imgWidth) || 
+          (jrow < 0) || 
+          (jrow >= this.win.imgHeight) ||
+          (this.segmentData[index] < 0) || 
+          (this.visited[index] == true) ||
+          (this.segmentData[index] == value)) continue;
+
+      // Apparently we need to. Record the cell value in the image...
+      this.segmentData[index] = value;
+
+      // ... record that we have visited this cell...
+      this.visited[index] = true;
+
+      // ... increment the output counter, and ...
+      output += 1;
+
+      // ... push the neighboring cells onto the stack.
+      if (jrow > 0) fillStack.push([icol, jrow-1]);
+      if (jrow <= this.win.imgHeight) fillStack.push([icol, jrow+1]);
+      if (icol > 0) fillStack.push([icol-1, jrow]);
+      if (icol <= this.win.imgWidth) fillStack.push([icol+1, jrow]);
+    }
+
+    return(output);
+  }
+
   async performSegmentation(imageData) {
 
     // What are the actual dimensions of the displayed image, in pixels.
@@ -188,6 +239,52 @@ class SuperImage {
         //             this.segmentData[375]);
 
         // Other segmentation work goes here.
+
+
+        this.visited = new Uint8Array(this.segmentData.length).fill(false);
+
+        var nextObject = 0;
+        var index = 0;
+        for (let i = 0; i < this.win.imgWidth; i++) {
+          for (let j = 0; j < this.win.imgHeight; j++) {
+        
+            index = j * this.win.imgWidth + i;
+
+            if (this.segmentData[index] == 0) {
+              // We have an object we probably we haven't seen it before...
+          
+              // ... double check about not seeing it before.
+              if (this.visited[index] == false) {
+
+                console.log("found one", i, j, nextObject);
+
+                nextObject += 1;
+                var objectID = nextObject;
+
+                // Record some results in the segmentData record.
+                if (!this.segmentRecords.has(objectID)) {
+                  this.segmentRecords.set(objectID,
+                                          {sum: this.segmentRecord.sum,
+                                           color: this.segmentRecord.color,
+                                           color: this.segmentRecord.haptic,
+                                           color: this.segmentRecord.sound });
+                }
+
+                // Fill the object, return
+                this.segmentRecords.get(objectID).sum = 
+                  this.floodFill(i, j, objectID);
+
+                console.log("segmentation record:", objectID, 
+                            this.segmentRecords.get(objectID).sum);
+                // As of here, we have a rough estimate of the size of an
+                // object, so this is a place where we can put logic to
+                // assign different notes or haptic values based on size.
+
+              }
+            }
+          }
+        }
+
         console.log("Done with segmentation, ready to rock.");
       });
 
