@@ -128,40 +128,6 @@ class SuperImage {
     }
   }
 
-  play(x, y) {
-    console.log("Playing at:", x.toFixed(2), y.toFixed(2));
-    const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 'impactHeavy';
-    if (this.canTriggerVibration) {
-      console.log(`Triggering Haptic with style: ${style}`);
-      this.triggerHaptic(style);
-      this.canTriggerVibration = false;
-      setTimeout(() => {
-        this.canTriggerVibration = true;
-      }, 1000);
-    }
-
-    this.triggerSound();
-  }
-
-  triggerSound() {
-    if (!this.soundPlayer.isPlaying) {
-      console.log("Starting sound...");
-      this.soundPlayer.play(() => {
-        console.log("Sound started.");
-      });
-    }
-  }
-
-  stopSound() {
-    if (this.soundPlayer.isPlaying) {
-      console.log("Stopping sound...");
-      this.soundPlayer.stop(() => {
-        console.log("Sound stopped.");
-      });
-    }
-  }
-
-
   triggerHaptic(style) {
     ReactNativeHapticFeedback.trigger(style, {
       enableVibrateFallback: true,

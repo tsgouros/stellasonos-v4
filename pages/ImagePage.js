@@ -17,8 +17,7 @@ import { Grayscale } from "react-native-image-filter-kit";
 import SuperImage from '../utils/SuperImage.js';
 
 export default function ImagePage({ route, navigation }) {
-  const { image, name } = route.params;
-  // 'name' seems generally undefined here.
+  const { image } = route.params; // Assuming 'image' is correctly provided from navigation params
 
   // Create an instance of SuperImage
   const superImage = useRef(new SuperImage(image)).current;
@@ -43,12 +42,9 @@ export default function ImagePage({ route, navigation }) {
             });
             superImage.play(pan.x._value, pan.y._value);
           }}
-          // onResponderMove={(event) => {
-          //   const x = event.nativeEvent.pageX - 25;
-          //   const y = event.nativeEvent.pageY + 25;
-          //   pan.setValue({ x: x, y: y });
-          //   superImage.play(x, y);
-          // }}
+          onResponderRelease={() => {
+            superImage.stopSound(); // Call stopSound when the finger is lifted
+          }}
         >
          <Image 
             style={styles.image}
@@ -74,14 +70,6 @@ export default function ImagePage({ route, navigation }) {
               },
             ],
           }}
-    onStartShouldSetResponder={(event) => {
-      pan.setValue({x: event.nativeEvent.pageX - 25,
-                    y: event.nativeEvent.pageY + 25,
-                   });
-      false }}
-    onMoveShouldSetResponder={(evt) => false }
-    onResponderReject={(event) => {}}
-    onResponderGrant={(event) => {}}
         >
           <View style={styles.circle} />
         </Animated.View>
