@@ -1,20 +1,6 @@
 {
   "images":[
     {
-      "src": "https://sgouros.com/nasa/testimage.png",
-      "title": "Test image",
-      "description": "Test image",
-      "url": "https://sgouros.com/nasa/testimage",
-      "id": "622",
-      "layers": [
-        {
-          "src": "https://sgouros.com/nasa/testimage.png",
-          "id": "622_xray",
-          "layer": "xray"
-        }
-      ]
-    },
-    {
       "src":"https://chandra.harvard.edu/photo/2021/mgb2016/mgb2016.jpg",
       "title":"MG B2016+112",
       "description":"A single or pair of growing supermassive black holes located 11.8 billion light-years from Earth.",
