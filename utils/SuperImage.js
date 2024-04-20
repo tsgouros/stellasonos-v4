@@ -315,44 +315,43 @@ class SuperImage {
     this.isPlaying = true;
     let pos = this.getPos(x, y);
     let index = pos.y * this.win.imgWidth + pos.x;
-
-    // check if segmentData is initialized and index is within bounds
+  
     if (!this.segmentData || index < 0 || index >= this.segmentData.length) {
-        console.error("Segment data not available, or index out of bounds:", index);
-        return;
+      console.error("Segment data not available, or index out of bounds:", index);
+      return;
     }
-
+  
     console.log("Playing at:", pos.x, pos.y, this.segmentData[index]);
-
+  
     let segmentValue = this.segmentData[index];
-    segmentValue = segmentValue ? segmentValue.toString() : 'undefined';
-
+    segmentValue = segmentValue !== undefined ? segmentValue.toString() : 'undefined'; // Ensure string conversion
+  
     if (!(segmentValue in this.players)) {
-        console.error(`ERROR No player associated with segment value ${segmentValue}`);
-        return;
+      console.error(`ERROR No player associated with segment value ${segmentValue}`);
+      return;
     }
-
+  
     if (this.activeSegment !== segmentValue) {
-        if (this.activePlayer && this.activePlayer.isPlaying) {
-            this.activePlayer.stop();
-        }
-        this.activePlayer = this.players[segmentValue];
-        this.activeSegment = segmentValue;
+      if (this.activePlayer && this.activePlayer.isPlaying) {
+        this.activePlayer.stop();
+      }
+      this.activePlayer = this.players[segmentValue];
+      this.activeSegment = segmentValue;
     }
-
+  
     if (this.activePlayer && !this.activePlayer.isPlaying) {
-        this.activePlayer.play();
-        this.scheduleSwitch();
+      this.activePlayer.play();
+      this.scheduleSwitch();
     }
-
+  
     // determine haptic
     const hapticStyle = ironicConfig.colors[this.description][segmentValue]?.haptic || 'light';
     if (this.canTriggerVibration) {
-        this.triggerHaptic(hapticStyle);
-        this.canTriggerVibration = false;
-        setTimeout(() => this.canTriggerVibration = true, 1000);
+      this.triggerHaptic(hapticStyle);
+      this.canTriggerVibration = false;
+      setTimeout(() => this.canTriggerVibration = true, 1000);
     }
-}
+  }
   
   switchPlayer() {
     if (this.isPlaying && this.activePlayer && this.activePlayer.isPlaying) {
