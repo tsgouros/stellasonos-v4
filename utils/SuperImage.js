@@ -1,6 +1,7 @@
 import { Animated, Dimensions } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Player } from '@react-native-community/audio-toolkit';
+import ironicConfig from './ironicConfig.json'; 
 
 import * as _Jimp from 'jimp';
 const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
@@ -32,7 +33,7 @@ class SuperImage {
     console.log("initializing SuperImage", Object.keys(complexImage));
     this.masterSrc = complexImage.src;
     this.URL = complexImage.url;
-    this.description = complexImage.description
+    this.description = complexImage.description;
     this.id = complexImage.id;
     this.layers = new Array();
 
@@ -43,7 +44,6 @@ class SuperImage {
 
     // Start at the first image key.
     this.currentImageKey = Object.keys(this.layers)[0];
-    console.log("complexImage starting with:", this.currentImageKey);
     
     // This will be our segmentation record. Ultimately, the segmented
     // image should just be another SubImage in the layers array, but
@@ -56,7 +56,7 @@ class SuperImage {
     // vibrations to be played for that segment. This is a prototype
     // record to be used as a model. It is also the empty record
     // returned when there is no object at that pixel position. 
-    this.segmentRecord = {sum: 0, color: 0, haptic: 0, sound: 0};
+    this.segmentRecord = { sum: 0, color: 0, haptic: 0, sound: 0 };
     
     // This is for processing the floodFill used in segmentation.
     this.visited = null;
@@ -64,36 +64,27 @@ class SuperImage {
     // This is a collection of records corresponding to the objects in
     // an image. The zero record is the empty record.
     this.segmentRecords = new Map();
-    this.segmentRecords.set(0, Object.assign({}, this.segmentRecord));
+    this.segmentRecords.set(0, {...this.segmentRecord});
 
-    this.pan = new Animated.ValueXY(); // handling drag movements
-    this.canTriggerVibration = true; // control vibration feedback frequency
-    this.soundUrl = "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3"; //url for sound effect
-    this.initialVolume = 0.5; // initial sound volume
-    this.soundPlayer = new Player(this.soundUrl, {
-      autoDestroy: false
-    }).prepare((err) => {
-      if (!err) {
-        this.soundPlayer.volume = this.initialVolume;
-      }
-    });
-
-    /* new */
-    // Initialize two sound players
-    this.playerOne = new Player(this.soundUrl, { autoDestroy: false }).prepare();
-    this.playerTwo = new Player(this.soundUrl, { autoDestroy: false }).prepare();
-    this.playerOne.volume = this.initialVolume;
-    this.playerTwo.volume = this.initialVolume;
-
-    this.activePlayer = this.playerOne;
-    this.nextPlayer = this.playerTwo;
-    this.isPlayerOneActive = true;
-
-    this.isPlaying = false; // New state control
+    this.pan = new Animated.ValueXY();
+    this.canTriggerVibration = true;
+    this.initialVolume = ironicConfig.initialVolume;
+    this.players = {};
+    this.isPlaying = false;
     this.switchInterval = 5000; // Time between automatic player switches
 
-    // placeholder for segmented image data
-    /// this.layers['segmented'] = null;
+    // load sounds for each segment from ironicConfig
+    const sounds = ironicConfig.colors[this.description];
+    for (let key in sounds) {
+      this.players[key] = new Player(sounds[key].sound, { autoDestroy: false }).prepare((err) => {
+        if (!err) {
+          this.players[key].volume = this.initialVolume;
+        }
+      });
+    }
+
+    this.activeSegment = "0";  // default seg
+    this.activePlayer = this.players[this.activeSegment];
   }
 
   addImage(image, name="") {
@@ -314,57 +305,79 @@ class SuperImage {
   // by the gesture's x, y coordinates) to trigger different sounds or
   // haptic feedback based on segment
   play(x, y) {
-    /* new */
-    this.isPlaying = true; // Set isPlaying to true to allow sound
-    // Check segmentation data
-    let pos = this.getPos(x, y)
-    console.log("playing at:", pos.x, pos.y,
-                this.segmentData[ pos.y * this.win.imgWidth + pos.x ]);
-
-    const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 
-          'impactHeavy';
-    if (this.canTriggerVibration) {
-      console.log(`Triggering Haptic with style: ${style}`);
-      this.triggerHaptic(style);
-      this.canTriggerVibration = false;
-      setTimeout(() => {
-        this.canTriggerVibration = true;
-      }, 1000); // reset haptic trigger flag after a delay
+    this.isPlaying = true;
+    let pos = this.getPos(x, y);
+    let index = pos.y * this.win.imgWidth + pos.x;
+    
+    console.log("playing at:", pos.x, pos.y, this.segmentData[index]);
+  
+    if (!this.segmentData || index >= this.segmentData.length || index < 0) {
+      console.error("ERROR Segment data is not available or index is out of bounds.");
+      return;
     }
-
-    // if (!this.soundPlayer.isPlaying) {
-    //   console.log("Starting sound..."); // log before playing sound
-    //   this.triggerSound();
-    // }
-    if (!this.activePlayer.isPlaying && this.isPlaying) {
-      console.log("Starting sound..."); // log before playing sound
+  
+    let segmentValue = this.segmentData[index];
+    segmentValue = segmentValue ? segmentValue.toString() : 'undefined';
+  
+    if (!(segmentValue in this.players)) {
+      console.error(`ERROR No player associated with segment value ${segmentValue}`);
+      return;
+    }
+  
+    if (this.activeSegment !== segmentValue) {
+      if (this.activePlayer && this.activePlayer.isPlaying) {
+        this.activePlayer.stop();  // Stop the currently playing sound
+      }
+      this.activePlayer = this.players[segmentValue];
+      this.activeSegment = segmentValue;
+    }
+  
+    if (this.activePlayer && !this.activePlayer.isPlaying) {
       this.activePlayer.play();
       this.scheduleSwitch();
     }
+  
+    const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 'impactHeavy';
+    if (this.canTriggerVibration) {
+      ReactNativeHapticFeedback.trigger(style, {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+      this.canTriggerVibration = false;
+      setTimeout(() => this.canTriggerVibration = true, 1000);
+    }
   }
-
+  
+  switchPlayer() {
+    if (this.isPlaying && this.activePlayer && this.activePlayer.isPlaying) {
+      this.activePlayer.stop();
+      this.activePlayer.play();  // Immediately play the same player to simulate continuous sound
+    }
+  }
+  
   scheduleSwitch() {
-    clearTimeout(this.switchTimer); // Clear any existing switch timer
+    clearTimeout(this.switchTimer);
     this.switchTimer = setTimeout(() => {
-      if (this.isPlaying) { // Only switch players if still playing
-        this.switchPlayer();
-        this.activePlayer.play();
+      this.switchPlayer();
+      if (this.isPlaying) {
         this.scheduleSwitch();
       }
     }, this.switchInterval);
   }
-
-  switchPlayer() {
-    this.isPlayerOneActive = !this.isPlayerOneActive;
-    this.activePlayer = this.isPlayerOneActive ? this.playerOne : this.playerTwo;
-    this.nextPlayer = this.isPlayerOneActive ? this.playerTwo : this.playerOne;
+  
+  stopSound() {
+    this.isPlaying = false;
+    if (this.activePlayer) {
+      this.activePlayer.stop();
+    }
+    clearTimeout(this.switchTimer);
   }
 
-  stopSound() {
-    this.isPlaying = false; // Set isPlaying to false to stop sound
-    this.playerOne.stop();
-    this.playerTwo.stop();
-    clearTimeout(this.switchTimer); // Ensure no player switch occurs after stopping
+  componentWillUnmount() {
+    // Clean up players
+    for (let key in this.players) {
+      this.players[key].destroy();
+    }
   }
 
   triggerHaptic(style) {
@@ -376,10 +389,14 @@ class SuperImage {
   }
 
   componentWillUnmount() {
-    if (this.soundPlayer) {
-      this.soundPlayer.destroy();
-    }
+    Object.values(this.players).forEach(player => {
+      if (player) {
+        player.stop();
+        player.destroy();
+      }
+    });
   }
+  
 }
 
 export default SuperImage;
