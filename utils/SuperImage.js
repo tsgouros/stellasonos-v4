@@ -76,11 +76,18 @@ class SuperImage {
     // load sounds for each segment from ironicConfig
     const sounds = ironicConfig.colors[this.description];
     for (let key in sounds) {
-      this.players[key] = new Player(sounds[key].sound, { autoDestroy: false }).prepare((err) => {
-        if (!err) {
-          this.players[key].volume = this.initialVolume;
-        }
-      });
+      if (sounds.hasOwnProperty(key)) {
+        const soundUrl = sounds[key].sound; // Accessing the sound URL specifically
+        this.players[key] = new Player(soundUrl, {autoDestroy: false});
+        this.players[key].prepare((err) => {
+          if (err) {
+            console.error("Error preparing player for segment", key, ":", err);
+          } else {
+            this.players[key].volume = this.initialVolume;
+            console.log("Player for segment", key, "prepared with sound", soundUrl);
+          }
+        });
+      }
     }
 
     this.activeSegment = "0";  // default seg
@@ -308,45 +315,44 @@ class SuperImage {
     this.isPlaying = true;
     let pos = this.getPos(x, y);
     let index = pos.y * this.win.imgWidth + pos.x;
-    
-    console.log("playing at:", pos.x, pos.y, this.segmentData[index]);
-  
-    if (!this.segmentData || index >= this.segmentData.length || index < 0) {
-      console.error("ERROR Segment data is not available or index is out of bounds.");
-      return;
+
+    // check if segmentData is initialized and index is within bounds
+    if (!this.segmentData || index < 0 || index >= this.segmentData.length) {
+        console.error("Segment data not available, or index out of bounds:", index);
+        return;
     }
-  
+
+    console.log("Playing at:", pos.x, pos.y, this.segmentData[index]);
+
     let segmentValue = this.segmentData[index];
     segmentValue = segmentValue ? segmentValue.toString() : 'undefined';
-  
+
     if (!(segmentValue in this.players)) {
-      console.error(`ERROR No player associated with segment value ${segmentValue}`);
-      return;
+        console.error(`ERROR No player associated with segment value ${segmentValue}`);
+        return;
     }
-  
+
     if (this.activeSegment !== segmentValue) {
-      if (this.activePlayer && this.activePlayer.isPlaying) {
-        this.activePlayer.stop();  // Stop the currently playing sound
-      }
-      this.activePlayer = this.players[segmentValue];
-      this.activeSegment = segmentValue;
+        if (this.activePlayer && this.activePlayer.isPlaying) {
+            this.activePlayer.stop();
+        }
+        this.activePlayer = this.players[segmentValue];
+        this.activeSegment = segmentValue;
     }
-  
+
     if (this.activePlayer && !this.activePlayer.isPlaying) {
-      this.activePlayer.play();
-      this.scheduleSwitch();
+        this.activePlayer.play();
+        this.scheduleSwitch();
     }
-  
-    const style = Math.abs(x) < 100 && Math.abs(y) < 100 ? 'impactLight' : 'impactHeavy';
+
+    // determine haptic
+    const hapticStyle = ironicConfig.colors[this.description][segmentValue]?.haptic || 'light';
     if (this.canTriggerVibration) {
-      ReactNativeHapticFeedback.trigger(style, {
-        enableVibrateFallback: true,
-        ignoreAndroidSystemSettings: false,
-      });
-      this.canTriggerVibration = false;
-      setTimeout(() => this.canTriggerVibration = true, 1000);
+        this.triggerHaptic(hapticStyle);
+        this.canTriggerVibration = false;
+        setTimeout(() => this.canTriggerVibration = true, 1000);
     }
-  }
+}
   
   switchPlayer() {
     if (this.isPlaying && this.activePlayer && this.activePlayer.isPlaying) {
@@ -371,13 +377,6 @@ class SuperImage {
       this.activePlayer.stop();
     }
     clearTimeout(this.switchTimer);
-  }
-
-  componentWillUnmount() {
-    // Clean up players
-    for (let key in this.players) {
-      this.players[key].destroy();
-    }
   }
 
   triggerHaptic(style) {
