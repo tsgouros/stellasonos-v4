@@ -33,7 +33,7 @@ class SuperImage {
     console.log("initializing SuperImage", Object.keys(complexImage));
     this.masterSrc = complexImage.src;
     this.URL = complexImage.url;
-    this.description = complexImage.description;
+    this.title = complexImage.title;
     this.id = complexImage.id;
     this.layers = new Array();
 
@@ -63,7 +63,7 @@ class SuperImage {
 
     // This is a collection of records corresponding to the objects in
     // an image. The zero record is the empty record.
-    this.segmentRecords = new Map();
+    this.segmentRecords = new Map();l
     this.segmentRecords.set(0, {...this.segmentRecord});
 
     this.pan = new Animated.ValueXY();
@@ -74,7 +74,7 @@ class SuperImage {
     this.switchInterval = 5000; // Time between automatic player switches
 
     // load sounds for each segment from ironicConfig
-    const sounds = ironicConfig.colors[this.description];
+    const sounds = ironicConfig.colors[this.title];
     for (let key in sounds) {
       if (sounds.hasOwnProperty(key)) {
         const soundUrl = sounds[key].sound; // Accessing the sound URL specifically
@@ -345,7 +345,7 @@ class SuperImage {
     }
   
     // determine haptic
-    const hapticStyle = ironicConfig.colors[this.description][segmentValue]?.haptic || 'light';
+    const hapticStyle = ironicConfig.colors[this.title][segmentValue]?.haptic;
     if (this.canTriggerVibration) {
       this.triggerHaptic(hapticStyle);
       this.canTriggerVibration = false;
