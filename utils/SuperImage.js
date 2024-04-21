@@ -63,7 +63,7 @@ class SuperImage {
 
     // This is a collection of records corresponding to the objects in
     // an image. The zero record is the empty record.
-    this.segmentRecords = new Map();l
+    this.segmentRecords = new Map();
     this.segmentRecords.set(0, {...this.segmentRecord});
 
     this.pan = new Animated.ValueXY();
