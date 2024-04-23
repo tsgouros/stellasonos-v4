@@ -1,47 +1,46 @@
 {
-    "initialVolume": 0.5,
     "colors": {
       "Test image": {
-        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "haptic": "light"},
-        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "haptic": "heavy"},
-        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "haptic": "heavy"},
-        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "haptic": "heavy"},
-        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "haptic": "heavy"}
+        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "volume": 0.1, "haptic": "light"},
+        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "volume": 0.9, "haptic": "heavy"},
+        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "volume": 0.9, "haptic": "heavy"},
+        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "volume": 2.0, "haptic": "heavy"},
+        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "volume": 2.0, "haptic": "heavy"}
       },
       "MG B2016+112": {
-        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "haptic": "light"},
-        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "haptic": "heavy"},
-        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "haptic": "heavy"},
-        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "haptic": "heavy"},
-        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "haptic": "heavy"}
+        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "volume": 0.1, "haptic": "light"},
+        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "volume": 0.9, "haptic": "heavy"},
+        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "volume": 0.9, "haptic": "heavy"},
+        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "volume": 2.0, "haptic": "heavy"},
+        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "volume": 2.0, "haptic": "heavy"}
       },
       "V404 Cygni": {
-        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "haptic": "light"},
-        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "haptic": "heavy"},
-        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "haptic": "heavy"},
-        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "haptic": "heavy"},
-        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "haptic": "heavy"}
+        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "volume": 0.1, "haptic": "light"},
+        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "volume": 0.9, "haptic": "heavy"},
+        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "volume": 0.9, "haptic": "heavy"},
+        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "volume": 2.0, "haptic": "heavy"},
+        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "volume": 2.0, "haptic": "heavy"}
       },
       "Abell 1775": {
-        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "haptic": "light"},
-        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "haptic": "heavy"},
-        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "haptic": "heavy"},
-        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "haptic": "heavy"},
-        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "haptic": "heavy"}
+        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "volume": 0.1, "haptic": "light"},
+        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "volume": 0.9, "haptic": "heavy"},
+        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "volume": 0.9, "haptic": "heavy"},
+        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "volume": 2.0, "haptic": "heavy"},
+        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "volume": 2.0, "haptic": "heavy"}
       },
       "Northern Clump": {
-        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "haptic": "light"},
-        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "haptic": "heavy"},
-        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "haptic": "heavy"},
-        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "haptic": "heavy"},
-        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "haptic": "heavy"}
+        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "volume": 0.1, "haptic": "light"},
+        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "volume": 0.9, "haptic": "heavy"},
+        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "volume": 0.9, "haptic": "heavy"},
+        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "volume": 2.0, "haptic": "heavy"},
+        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "volume": 2.0, "haptic": "heavy"}
       },
       "MSH 15-52": {
-        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "haptic": "light"},
-        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "haptic": "heavy"},
-        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "haptic": "heavy"},
-        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "haptic": "heavy"},
-        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "haptic": "heavy"}
+        "-1": { "sound": "https://sgouros.com/stellasonos/samples/piano/C1.mp3", "volume": 0.1, "haptic": "light"},
+        "0": { "sound": "https://stellasonos-files.vercel.app/samples/bassoon/G1.mp3", "volume": 0.9, "haptic": "heavy"},
+        "1": { "sound": "https://sgouros.com/stellasonos/samples/bass-electric/As2.mp3", "volume": 0.9, "haptic": "heavy"},
+        "2": { "sound": "https://sgouros.com/stellasonos/samples/flute/C5.mp3", "volume": 2.0, "haptic": "heavy"},
+        "3": { "sound": "https://sgouros.com/stellasonos/samples/violin/G6.mp3", "volume": 2.0, "haptic": "heavy"}
       }
     }
   }

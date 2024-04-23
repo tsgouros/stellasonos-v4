@@ -1,7 +1,7 @@
 import { Animated, Dimensions } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Player } from '@react-native-community/audio-toolkit';
-import ironicConfig from './ironicConfig.json'; 
+import ironicConfig from './ironicConfig.json';
 
 import * as _Jimp from 'jimp';
 const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
@@ -16,8 +16,8 @@ class SubImage {
     this.description = description;
   }
 
-  clone = async function() {
-    return(new SubImage(this.src, this.description));
+  clone = async function () {
+    return (new SubImage(this.src, this.description));
   }
 }
 
@@ -28,7 +28,7 @@ class SubImage {
 // an entry in the images.json file, and it contains a master URL, and
 // also a collection of subImage URLs.
 class SuperImage {
-  constructor(complexImage, name="") {
+  constructor(complexImage, name = "") {
 
     console.log("initializing SuperImage", Object.keys(complexImage));
     this.masterSrc = complexImage.src;
@@ -38,13 +38,13 @@ class SuperImage {
     this.layers = new Array();
 
     for (var i = 0; i < complexImage.layers.length; i++) {
-      this.layers[complexImage.layers[i].id] = 
+      this.layers[complexImage.layers[i].id] =
         new SubImage(complexImage.layers[i].src, complexImage.layers[i].layer);
     }
 
     // Start at the first image key.
     this.currentImageKey = Object.keys(this.layers)[0];
-    
+
     // This will be our segmentation record. Ultimately, the segmented
     // image should just be another SubImage in the layers array, but
     // later.
@@ -57,14 +57,14 @@ class SuperImage {
     // record to be used as a model. It is also the empty record
     // returned when there is no object at that pixel position. 
     this.segmentRecord = { sum: 0, color: 0, haptic: 0, sound: 0 };
-    
+
     // This is for processing the floodFill used in segmentation.
     this.visited = null;
 
     // This is a collection of records corresponding to the objects in
     // an image. The zero record is the empty record.
     this.segmentRecords = new Map();
-    this.segmentRecords.set(0, {...this.segmentRecord});
+    this.segmentRecords.set(0, { ...this.segmentRecord });
 
     this.pan = new Animated.ValueXY();
     this.canTriggerVibration = true;
@@ -77,14 +77,14 @@ class SuperImage {
     const sounds = ironicConfig.colors[this.title];
     for (let key in sounds) {
       if (sounds.hasOwnProperty(key)) {
-        const soundUrl = sounds[key].sound; // Accessing the sound URL specifically
-        this.players[key] = new Player(soundUrl, {autoDestroy: false});
+        const { sound: soundUrl, volume } = sounds[key]; // Destructure sound URL and volume from config
+        this.players[key] = new Player(soundUrl, { autoDestroy: false });
         this.players[key].prepare((err) => {
           if (err) {
             console.error("Error preparing player for segment", key, ":", err);
           } else {
-            this.players[key].volume = this.initialVolume;
-            console.log("Player for segment", key, "prepared with sound", soundUrl);
+            this.players[key].volume = volume; // player volume based on config
+            console.log("Player for segment", key, "prepared with sound", soundUrl, "and volume", volume);
           }
         });
       }
@@ -94,39 +94,40 @@ class SuperImage {
     this.activePlayer = this.players[this.activeSegment];
   }
 
-  addImage(image, name="") {
+  addImage(image, name = "") {
     var imageKey = name;
-    if (imageKey == "") imageKey=this.layers.length.toString();
-    
+    if (imageKey == "") imageKey = this.layers.length.toString();
+
     this.layers[imageKey] = image;
   }
 
   currentImage() {
-    return(this.layers[this.currentImageKey]);
+    return (this.layers[this.currentImageKey]);
   }
 
   // Accept window coordinates, return image coordinates.
-  getPos(x, y) { 
-    var yr = (this.win.totalHeight - this.win.winHeight)/2;
-    return { x: Math.round((x / this.win.winWidth) * this.win.imgWidth),
-             y: Math.round(((y - yr)/ this.win.winHeight) * this.win.imgHeight),
-           };
-    }
+  getPos(x, y) {
+    var yr = (this.win.totalHeight - this.win.winHeight) / 2;
+    return {
+      x: Math.round((x / this.win.winWidth) * this.win.imgWidth),
+      y: Math.round(((y - yr) / this.win.winHeight) * this.win.imgHeight),
+    };
+  }
 
 
   // Given a bit position [i,j], this function does a flood fill on
   // all the connected area, setting all those pixels to the input
   // 'value' argument. The image being operated on is this.segmentedData.
   floodFill(i, j, value) {
-    if ((i < 0) || (i >= this.win.imgWidth) || 
-        (j < 0) || (j >= this.win.imgHeight)) return(0);
+    if ((i < 0) || (i >= this.win.imgWidth) ||
+      (j < 0) || (j >= this.win.imgHeight)) return (0);
 
     var fillStack = [];
 
     fillStack.push([i, j]);
     var output = 0;
 
-    while(fillStack.length > 0) {
+    while (fillStack.length > 0) {
       // Check the top of the stack.
       var [icol, jrow] = fillStack.pop();
       var index = jrow * this.win.imgWidth + icol;
@@ -134,13 +135,13 @@ class SuperImage {
       // Check to see if we need to bother with this cell. Either the cell 
       // is out of bounds, or was never our business, or it's already been 
       // visited.
-      if ((icol < 0) || 
-          (icol >= this.win.imgWidth) || 
-          (jrow < 0) || 
-          (jrow >= this.win.imgHeight) ||
-          (this.segmentData[index] < 0) || 
-          (this.visited[index] == true) ||
-          (this.segmentData[index] == value)) continue;
+      if ((icol < 0) ||
+        (icol >= this.win.imgWidth) ||
+        (jrow < 0) ||
+        (jrow >= this.win.imgHeight) ||
+        (this.segmentData[index] < 0) ||
+        (this.visited[index] == true) ||
+        (this.segmentData[index] == value)) continue;
 
       // Apparently we need to. Record the cell value in the image...
       this.segmentData[index] = value;
@@ -152,13 +153,13 @@ class SuperImage {
       output += 1;
 
       // ... push the neighboring cells onto the stack.
-      if (jrow > 0) fillStack.push([icol, jrow-1]);
-      if (jrow <= this.win.imgHeight) fillStack.push([icol, jrow+1]);
-      if (icol > 0) fillStack.push([icol-1, jrow]);
-      if (icol <= this.win.imgWidth) fillStack.push([icol+1, jrow]);
+      if (jrow > 0) fillStack.push([icol, jrow - 1]);
+      if (jrow <= this.win.imgHeight) fillStack.push([icol, jrow + 1]);
+      if (icol > 0) fillStack.push([icol - 1, jrow]);
+      if (icol <= this.win.imgWidth) fillStack.push([icol + 1, jrow]);
     }
 
-    return(output);
+    return (output);
   }
 
   async performSegmentation(imageData) {
@@ -166,7 +167,7 @@ class SuperImage {
     // What are the actual dimensions of the displayed image, in pixels.
     this.win = {
       winWidth: Dimensions.get("window").width,
-      winHeight: (imageData.height / imageData.width) * 
+      winHeight: (imageData.height / imageData.width) *
         Dimensions.get("window").width,
       totalHeight: Dimensions.get("window").height,
       imgWidth: imageData.width,
@@ -178,19 +179,19 @@ class SuperImage {
     console.log("Window thing:", this.win);
 
     await new Jimp(
-      imageData.width, imageData.height, 
-      (error, jData) => { 
-        console.log("JIMP success ***!", error, Object.keys(imageData),Object.keys(jData.bitmap), jData.bitmap.width, jData.bitmap.height, typeof jData.bitmap.data[1], imageData.colorType, imageData.sRGB, imageData.data.length);
+      imageData.width, imageData.height,
+      (error, jData) => {
+        console.log("JIMP success ***!", error, Object.keys(imageData), Object.keys(jData.bitmap), jData.bitmap.width, jData.bitmap.height, typeof jData.bitmap.data[1], imageData.colorType, imageData.sRGB, imageData.data.length);
         if (error) stop(error);
 
         // Build a convolution array.
         var kernelArray = Array.from(Array(5), () => new Array(5));
-        kernelArray[0] = [1/25, 1/25, 1/25, 1/25, 1/25];
-        kernelArray[1] = [1/25, 1/25, 1/25, 1/25, 1/25];
-        kernelArray[2] = [1/25, 1/25, 1/25, 1/25, 1/25];
-        kernelArray[3] = [1/25, 1/25, 1/25, 1/25, 1/25];
-        kernelArray[4] = [1/25, 1/25, 1/25, 1/25, 1/25];
-        
+        kernelArray[0] = [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25];
+        kernelArray[1] = [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25];
+        kernelArray[2] = [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25];
+        kernelArray[3] = [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25];
+        kernelArray[4] = [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25];
+
         // res is just for debugging, remove it when you want.
         var res
 
@@ -198,7 +199,7 @@ class SuperImage {
         // 'this' refers to something else inside the functions below.
         var result = new Int16Array(jData.bitmap.width * jData.bitmap.height);
         jData.scan(
-          0, 0, jData.bitmap.width, jData.bitmap.height, 
+          0, 0, jData.bitmap.width, jData.bitmap.height,
           function (x, y, idx) {
             // x, y is the position of this pixel on the image idx is
             // the start position of this rgba tuple in the bitmap.
@@ -216,12 +217,12 @@ class SuperImage {
                 .convolute(kernelArray)
                 .resize(imageData.width, imageData.height)
                 .greyscale()
-              // Apply a threshold and inversion, while copying to output.
-                .scan(0, 0, jData.bitmap.width, jData.bitmap.height, 
-                      function(x, y, idx) {
-                        result[y * jData.bitmap.width + x] =
-                          this.bitmap.data[idx] > 50 ? 0 : -1;
-                      });
+                // Apply a threshold and inversion, while copying to output.
+                .scan(0, 0, jData.bitmap.width, jData.bitmap.height,
+                  function (x, y, idx) {
+                    result[y * jData.bitmap.width + x] =
+                      this.bitmap.data[idx] > 50 ? 0 : -1;
+                  });
             }
 
           });
@@ -258,12 +259,12 @@ class SuperImage {
         var index = 0;
         for (let i = 0; i < this.win.imgWidth; i++) {
           for (let j = 0; j < this.win.imgHeight; j++) {
-        
+
             index = j * this.win.imgWidth + i;
 
             if (this.segmentData[index] == 0) {
               // We have an object we probably we haven't seen it before...
-          
+
               // ... double check about not seeing it before.
               if (this.visited[index] == false) {
 
@@ -275,18 +276,20 @@ class SuperImage {
                 // Record some results in the segmentData record.
                 if (!this.segmentRecords.has(objectID)) {
                   this.segmentRecords.set(objectID,
-                                          {sum: this.segmentRecord.sum,
-                                           color: this.segmentRecord.color,
-                                           color: this.segmentRecord.haptic,
-                                           color: this.segmentRecord.sound });
+                    {
+                      sum: this.segmentRecord.sum,
+                      color: this.segmentRecord.color,
+                      color: this.segmentRecord.haptic,
+                      color: this.segmentRecord.sound
+                    });
                 }
 
                 // Fill the object, return
-                this.segmentRecords.get(objectID).sum = 
+                this.segmentRecords.get(objectID).sum =
                   this.floodFill(i, j, objectID);
 
-                console.log("segmentation record:", objectID, 
-                            this.segmentRecords.get(objectID).sum);
+                console.log("segmentation record:", objectID,
+                  this.segmentRecords.get(objectID).sum);
                 // As of here, we have a rough estimate of the size of an
                 // object, so this is a place where we can put logic to
                 // assign different notes or haptic values based on size.
@@ -315,22 +318,22 @@ class SuperImage {
     this.isPlaying = true;
     let pos = this.getPos(x, y);
     let index = pos.y * this.win.imgWidth + pos.x;
-  
+
     if (!this.segmentData || index < 0 || index >= this.segmentData.length) {
       console.error("Segment data not available, or index out of bounds:", index);
       return;
     }
-  
+
     console.log("Playing at:", pos.x, pos.y, this.segmentData[index]);
-  
+
     let segmentValue = this.segmentData[index];
     segmentValue = segmentValue !== undefined ? segmentValue.toString() : 'undefined'; // Ensure string conversion
-  
+
     if (!(segmentValue in this.players)) {
       console.error(`ERROR No player associated with segment value ${segmentValue}`);
       return;
     }
-  
+
     if (this.activeSegment !== segmentValue) {
       if (this.activePlayer && this.activePlayer.isPlaying) {
         this.activePlayer.stop();
@@ -338,12 +341,12 @@ class SuperImage {
       this.activePlayer = this.players[segmentValue];
       this.activeSegment = segmentValue;
     }
-  
+
     if (this.activePlayer && !this.activePlayer.isPlaying) {
       this.activePlayer.play();
       this.scheduleSwitch();
     }
-  
+
     // determine haptic
     const hapticStyle = ironicConfig.colors[this.title][segmentValue]?.haptic;
     if (this.canTriggerVibration) {
@@ -352,14 +355,14 @@ class SuperImage {
       setTimeout(() => this.canTriggerVibration = true, 1000);
     }
   }
-  
+
   switchPlayer() {
     if (this.isPlaying && this.activePlayer && this.activePlayer.isPlaying) {
       this.activePlayer.stop();
       this.activePlayer.play();  // Immediately play the same player to simulate continuous sound
     }
   }
-  
+
   scheduleSwitch() {
     clearTimeout(this.switchTimer);
     this.switchTimer = setTimeout(() => {
@@ -369,13 +372,23 @@ class SuperImage {
       }
     }, this.switchInterval);
   }
-  
+
   stopSound() {
     this.isPlaying = false;
     if (this.activePlayer) {
       this.activePlayer.stop();
     }
     clearTimeout(this.switchTimer);
+  }
+
+  // update volume of a player dynamically
+  updateVolume(segmentKey, newVolume) {
+    if (this.players[segmentKey]) {
+      this.players[segmentKey].volume = newVolume;
+      console.log(`Updated volume for segment ${segmentKey} to ${newVolume}`);
+    } else {
+      console.log(`No player found for segment ${segmentKey}`);
+    }
   }
 
   triggerHaptic(style) {
@@ -394,7 +407,7 @@ class SuperImage {
       }
     });
   }
-  
+
 }
 
 export default SuperImage;
