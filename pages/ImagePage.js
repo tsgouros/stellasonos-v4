@@ -145,11 +145,13 @@ export default function ImagePage({ route, navigation }) {
 const styles = StyleSheet.create({
   imageContainer: {
     flex: 1,
-    backgroundColor: "#266",
+    // backgroundColor: "#266",
+    backgroundColor: "#FFFFFF",
     margin: 0,
     padding: 50,
     borderWidth: 12,
-    borderColor: "#F0A",
+    // borderColor: "#F0A",
+    borderColor: "#FFFFFF",
     position: "absolute",
     top: 0,
     left: 0, 
