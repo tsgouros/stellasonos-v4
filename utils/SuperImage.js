@@ -2,6 +2,7 @@ import { Animated, Dimensions } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Player } from '@react-native-community/audio-toolkit';
 import ironicConfig from './ironicConfig.json';
+import { Vibration } from 'react-native';
 
 import * as _Jimp from 'jimp';
 const Jimp = (typeof self !== 'undefined') ? (self.Jimp || _Jimp) : _Jimp;
@@ -300,8 +301,23 @@ class SuperImage {
         }
 
         console.log("Done with segmentation, ready to rock.");
-      });
 
+        // sound effect signaling segmentation completion
+        // const completionSound = new Player('https://sgouros.com/stellasonos/samples/saxophone/Cs4.mp3', { autoDestroy: true });
+        // const completionSound = new Player('https://codeskulptor-demos.commondatastorage.googleapis.com/pang/pop.mp3', { autoDestroy: true });
+        const completionSound = new Player('https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a', { autoDestroy: true });
+        completionSound.prepare((err) => {
+          if (err) {
+            console.error('Error preparing completion sound:', err);
+          } else {
+            completionSound.play((err) => {
+              if (err) {
+                console.error('Error playing completion sound:', err);
+              }
+            });
+          }
+        });
+      });
   }
 
   // Retrieve one or more of the segment records corresponding to this
@@ -327,7 +343,7 @@ class SuperImage {
     console.log("Playing at:", pos.x, pos.y, this.segmentData[index]);
 
     let segmentValue = this.segmentData[index];
-    segmentValue = segmentValue !== undefined ? segmentValue.toString() : 'undefined'; // Ensure string conversion
+    segmentValue = segmentValue !== undefined ? segmentValue.toString() : 'undefined';
 
     if (!(segmentValue in this.players)) {
       console.error(`ERROR No player associated with segment value ${segmentValue}`);
@@ -347,12 +363,15 @@ class SuperImage {
       this.scheduleSwitch();
     }
 
-    // determine haptic
-    const hapticStyle = ironicConfig.colors[this.title][segmentValue]?.haptic;
-    if (this.canTriggerVibration) {
-      this.triggerHaptic(hapticStyle);
-      this.canTriggerVibration = false;
-      setTimeout(() => this.canTriggerVibration = true, 1000);
+    const hapticConfig = ironicConfig.colors[this.title][segmentValue]?.haptic;
+    // if (this.canTriggerVibration && hapticConfig) {
+    //   this.triggerHaptic(hapticConfig);
+    //   this.canTriggerVibration = false;
+    //   setTimeout(() => this.canTriggerVibration = true, 1000);
+    // }
+    // simplified with removed cooldown
+    if (hapticConfig) {
+        this.triggerHaptic(hapticConfig);
     }
   }
 
@@ -391,12 +410,26 @@ class SuperImage {
     }
   }
 
-  triggerHaptic(style) {
-    ReactNativeHapticFeedback.trigger(style, {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    });
-    console.log(`Haptic feedback triggered: ${style}`);
+  triggerHaptic(hapticConfig) {
+    if (hapticConfig.type === "haptic") {
+      ReactNativeHapticFeedback.trigger(hapticConfig.spec, {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+      console.log(`Haptic feedback triggered: ${hapticConfig.spec}`);
+    } else if (hapticConfig.type === "vibration") {
+      Vibration.vibrate(hapticConfig.spec);
+      console.log(`Vibration pattern triggered: ${JSON.stringify(hapticConfig.spec)}`);
+    }
+  }
+
+  triggerVibration(pattern) {
+    if (typeof pattern === 'number') {
+      Vibration.vibrate(pattern);
+    } else if (Array.isArray(pattern)) {
+      Vibration.vibrate(pattern);
+    }
+    console.log(`Vibration pattern triggered: ${JSON.stringify(pattern)}`);
   }
 
   componentWillUnmount() {
