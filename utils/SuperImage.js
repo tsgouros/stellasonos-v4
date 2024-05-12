@@ -1,4 +1,4 @@
-import { Animated, Dimensions } from 'react-native';
+import {Animated, Dimensions } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Player } from '@react-native-community/audio-toolkit';
 import ironicConfig from './ironicConfig.json';
