@@ -358,9 +358,18 @@ class SuperImage {
       this.activeSegment = segmentValue;
     }
 
+    // if (this.activePlayer && !this.activePlayer.isPlaying) {
+    //   this.activePlayer.play();
+    //   this.scheduleSwitch();
+    // }
+
+    // if the segment config exists 
+    let segmentConfig = ironicConfig.colors[this.title] && ironicConfig.colors[this.title][segmentValue];
     if (this.activePlayer && !this.activePlayer.isPlaying) {
       this.activePlayer.play();
-      this.scheduleSwitch();
+      if (segmentConfig.switchPlayer) {
+        this.scheduleSwitch();  // Only schedule switching if switchPlayer is true
+      }
     }
 
     const hapticConfig = ironicConfig.colors[this.title][segmentValue]?.haptic;
