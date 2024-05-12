@@ -62,8 +62,7 @@ To instal and run iOS simulator:
    npm run ios
    ``` 
 
-To run on iPhone or iPad, [follow these steps](https://reactnative.dev/docs/running-on-device?platform=ios)
-For this project, make sure you are running the .xcodeproj file. 
+To run on iPhone or iPad, [follow these steps](https://reactnative.dev/docs/running-on-device?platform=ios). For this project, make sure you are running the .xcodeproj file. 
 
 ### Android 
 To install and run Android simulator: 
