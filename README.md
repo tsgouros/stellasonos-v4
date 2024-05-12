@@ -26,8 +26,6 @@
 Sonification of astronomical data version 4. Visualization mobile application for looking at distant stellar objects with sounds and haptics for blind and low vision users. 
 Built with [React Native](https://reactnative.dev/). 
 
-<p align="right"><a href="#readme-top">back to top</a></p>
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -66,8 +64,6 @@ To instal and run iOS simulator:
 
 To run on iPhone or iPad, [follow these steps](https://reactnative.dev/docs/running-on-device?platform=ios)
 For this project, make sure you are running the .xcodeproj file. 
-
-<p align="right"><a href="#readme-top">back to top</a></p>
 
 ### Android 
 To install and run Android simulator: 
@@ -125,8 +121,6 @@ To install and run Android simulator:
    ```
 
 To run on Android phone or tablet, [follow these steps](https://reactnative.dev/docs/running-on-device?platform=android)
-
-<p align="right"><a href="#readme-top">back to top</a></p>
 
 <!-- Features -->
 ## Code
