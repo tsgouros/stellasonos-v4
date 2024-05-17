@@ -139,7 +139,7 @@ To run on Android phone or tablet, [follow these steps](https://reactnative.dev/
 
 <!-- Todos -->
 ## Todos
-- **Screen Reader Compatibility**: Refine code and gesture handling for better compatibility with screen readers ([VoiceOver](https://support.apple.com/guide/iphone/use-voiceover-gestures-iph3e2e2281/ios) on iOS and ([Talkback](https://accessibleandroid.com/talkback/) on Android. Include direct testing to ensure all components are properly announced.
+- **Screen Reader Compatibility**: Refine code and gesture handling for better compatibility with screen readers ([VoiceOver](https://support.apple.com/guide/iphone/use-voiceover-gestures-iph3e2e2281/ios) on iOS and [Talkback](https://accessibleandroid.com/talkback/) on Android). Include direct testing to ensure all components are properly announced.
 - **Enhance Image Segmentation**: Improve the accuracy of image segmentation, particularly by aligning x and y coordinates more accurately and developing a more sophisticated approach.
 - **Seamless Audio Playback**: Ensure that the two sound players operate without any gaps to provide a continuous audio experience.
 - **Android Testing**: Expand testing to Android devices, as the code has only been tested on iOS platform so far.
