@@ -146,11 +146,13 @@ To run on Android phone or tablet, [follow these steps](https://reactnative.dev/
 
 ## Notes from Yumeng
 Be mindful that When screenreaders are enabled, the default gesture behaviors are altered to accommodate ccessibility needs. Standard swipe gestures (like one-finger swipes) that are normally used for navigation are automatically replaced with alternative gestures (like three-finger swipes) to avoid conflicts with the single-finger gestures used for selecting and interacting with elements on the screen. Screen reader gestures on iOS and android are similar but have differences. 
+
 `Home.js`:
 - Please don't design with swipe cards like in V3! There appears to be limited research focused directly on how blind and low-vision users interact with swipe cards, such as those used in apps like Tinder + wihtout sounds or haptics, these users will get confused where they have swiped to! Dating apps have also historiclly been known for being inaccessible.
 - Take inspiration from Apple Photos. Use swipe feature to move between photos, and ensure users can navigate through thumbnails. Provide auditory feedback to inform users of their current position within the sequence of images.
-`imagePage.js
-- When users drag their finger over a segmented image to trigger specific sounds or haptics, the interaction somewhat reminds me of drawing apps like Procreate. Procreate has explicitly stated that VoiceOver is ([not compatible with its drawing function](https://help.procreate.com/procreate/handbook/interface-gestures/accessibility).
+  
+`imagePage.js':
+- When users drag their finger over a segmented image to trigger specific sounds or haptics, the interaction somewhat reminds me of drawing apps like Procreate. Procreate has explicitly stated that VoiceOver is ([not compatible with its drawing functions](https://help.procreate.com/procreate/handbook/interface-gestures/accessibility).
 - I haven't discovered any screen reader gesture alternatives that correlate with single-finger dragging, and it's unclear if this functionality is currently supported, as indicated by Procreate.
 - It's possible for users to set up a shortcut to toggle VoiceOver on and off, which can help avoid the need to navigate back to the global device settings.
 
