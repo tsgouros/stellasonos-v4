@@ -157,4 +157,9 @@ For `imagePage.js`:
 - I haven't discovered any screen reader gesture alternatives that correlate with single-finger dragging, and it's unclear if this functionality is currently supported, as indicated by Procreate.
 - It's possible for users to set up a shortcut to toggle VoiceOver on and off, which can help avoid the need to navigate back to the global device settings.
 
+Some Other Resources:
+- https://reactnative.dev/docs/accessibility
+- https://reactnative.dev/docs/accessibilityinfo
+- https://gestalt.pinterest.systems/foundations/accessibility
+
 <p align="right"><a href="#readme-top">back to top</a></p>
